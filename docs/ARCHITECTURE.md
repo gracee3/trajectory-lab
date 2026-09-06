@@ -1,17 +1,21 @@
-# Architecture status
+# Architecture direction
 
-Architecture is provisional until the [research report](RESEARCH_PLAN.md) establishes which Codex CLI events are exposed and how they can be observed.
+Phase 2 is specified in [Experiment Plan](EXPERIMENT_PLAN.md), informed by the source-backed [Research Report](RESEARCH_REPORT.md). Components below are planned.
 
-The intended lab has three small responsibilities:
+| Component | Responsibility |
+|---|---|
+| Task fixture | Versioned starting code, data, environment and behavioral contract |
+| Runner | Fresh workspace, one autonomous Codex CLI agent, declared resources and termination policy |
+| Capture | Existing user-accessible events plus separately labeled invocation, stderr and process metadata |
+| Artifact snapshot | Freeze final candidate changes and relevant new files before evaluation |
+| Independent evaluator | Check the submitted artifact in a clean environment; protect tests and authoritative results from candidate modification |
+| Run bundle | Associate task/run/artifact/evaluator identities, evidence, outcomes and gaps |
+| Replay | Inspect recorded activity and separately labeled evaluation results offline |
 
-1. Observe an existing user-accessible Codex CLI surface.
-2. Preserve its records in a simple, documented JSONL representation.
-3. Replay those records for educational inspection.
+The evaluator is a separate stage, not another agent. Keep its code and withheld cases inaccessible during the agent run. Keep final results outside candidate control during evaluation as well.
 
-The research phase must select the surface before choosing an implementation. Do not assume all execution modes expose identical events or that an internal event type is publicly available.
+Validate the installed CLI and selected surface before implementing its adapter. Exec JSON is the initial recommendation, with documented omissions; app-server is a larger option if required events justify it. Do not assume interactive transcript, exec output and persisted history have identical coverage.
 
-Preserve source/version provenance and native payloads. Distinguish source identifiers and timestamps from identifiers or timestamps added by the collector. Document gaps, transformations, and any redaction. A normalized record must not imply access to unobserved model inputs or internal state.
+Preserve native payloads, source/version provenance, and explicit unavailable values. Collector identifiers and receipt times are not source identifiers or execution timestamps. The task's final artifact is independent of whatever file-change details a log happens to expose.
 
-Replay is a display operation over recorded data; it must not rerun tools or request new model responses.
-
-The previous multi-model runner, scoring, acceptance, and training-export architecture is superseded. See [Vision](VISION.md) for scope and [Roadmap](ROADMAP.md) for sequencing.
+Replay never reruns tools or requests model responses. Private-state inference, multi-agent orchestration and training export remain outside the architecture.

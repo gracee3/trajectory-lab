@@ -4,7 +4,7 @@
 
 Trajectory Lab is a focused educational study of one mature coding agent: Codex CLI. It should help a user understand the observable execution lifecycle through concrete evidence: session boundaries, messages, tool requests, tool results, and other activity that the examined version actually exposes.
 
-Learning comes first. Start with the existing implementation and user-accessible interfaces, establish what is observable, and only then design a small recorder and replay experience.
+Learning comes first. The source investigation establishes a baseline for what is observable. The next phase uses reproducible, nontrivial software-engineering tasks to observe autonomous work and independently evaluate its final artifacts.
 
 ## Observe, don't infer
 
@@ -22,7 +22,9 @@ A source-code event is not automatically a user-accessible event. Research must 
 
 ## Scope
 
-Focus exclusively on Codex CLI. Research first; then map verified events into a simple schema, export JSONL, and replay one session as an inspectable timeline.
+Focus exclusively on one Codex CLI agent per run. Build versioned SWE task fixtures with reproducible environments and objective acceptance criteria; allow autonomous implementation, capture exposed activity, freeze the resulting artifact, and evaluate it independently. Map verified events into a simple schema, export JSONL, and inspect runs as timelines.
+
+Determinism belongs to starting conditions and acceptance criteria, not a prescribed patch or sequence of agent actions. Product correctness and observation fidelity are separate evaluations. Retain unsuccessful and incomplete attempts alongside successful ones.
 
 Replay displays recorded activity. It does not execute tools again, regenerate responses, or reproduce internal model state.
 
@@ -34,8 +36,10 @@ Hidden reasoning access, chain-of-thought reconstruction, private-state inferenc
 
 A reader can explain where an observed session begins and ends, follow a tool request to its visible result when identifiers support that relationship, identify gaps, and relate each displayed record to its original source.
 
-The lab should make the limits of observation as clear as the observations themselves.
+A reader can also identify the submitted artifact, understand the task requirements, and inspect independent evidence of which requirements passed or failed. An observed sequence does not establish why a solution worked.
+
+The lab should make the limits of observation and evaluation as clear as their findings.
 
 ## Direction
 
-This vision supersedes the initial general-purpose trajectory-generation proposal. The immediate next step is the [research-only handoff](RESEARCH_PLAN.md).
+This vision supersedes the initial general-purpose trajectory-generation proposal. The [Research Report](RESEARCH_REPORT.md) preserves the completed source investigation. The authorized next phase is [Controlled SWE Experiments](EXPERIMENT_PLAN.md), starting with a Rust parser repair, a database migration, and a process-supervision repair. Task-outcome evaluation is now in scope; model comparisons and training-data production remain deferred.

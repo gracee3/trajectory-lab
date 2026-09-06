@@ -1,7 +1,9 @@
-# Observation scenarios
+# Controlled SWE tasks
 
-Future examples should be small, benign Codex CLI sessions that help explain verified lifecycle boundaries and tool-call/result flows.
+This directory will contain versioned task fixtures and behavioral contracts for [Phase 2](../docs/EXPERIMENT_PLAN.md). No fixtures are implemented yet.
 
-Research may use disposable workspaces for observation and document exact reproduction steps. This is not a benchmark task pack or training-data generation system.
+Start with a Rust streaming parser repair, a data-preserving database migration, and a process-supervision repair. Implement and validate the parser experiment first.
 
-Choose scenarios after identifying the available surface and its limits. See the [Research Plan](../docs/RESEARCH_PLAN.md).
+Each task fixes its starting revision, environment, inputs, requirements, allowed resources, budget, autonomy policy and expected deliverables. It must require meaningful engineering work while supporting objective checks. Different correct implementations are acceptable.
+
+Protect reference solutions and withheld evaluator cases from agent access, including accessible Git history. Validate broken baselines and reference solutions before using a task. See [Evaluation](../docs/EVALUATION.md).

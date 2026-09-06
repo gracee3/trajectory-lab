@@ -1,47 +1,51 @@
 # Roadmap
 
-The current scope is an educational study of Codex CLI's observable execution lifecycle. This roadmap supersedes the earlier training-data pipeline.
+Trajectory Lab studies one Codex CLI agent through observable execution and reproducible SWE tasks. [Phase 2](EXPERIMENT_PLAN.md) adds independent artifact evaluation; it does not introduce model rankings or a training-data pipeline.
 
-## Foundation — documentation
+## Foundation and phase 1 — delivered documentation
 
-- [x] State the educational purpose and non-goals.
-- [x] Add Vision and a research-only handoff.
-- [x] Mark legacy schemas and broader pipeline plans as superseded.
+- [x] State educational purpose and observable-evidence boundaries.
+- [x] Publish [Research Plan](RESEARCH_PLAN.md) and [Research Report](RESEARCH_REPORT.md).
+- [x] Map lifecycle and inventory surfaces at a pinned upstream commit.
+- [x] Document capture recommendation and gaps.
+- [x] Record the authorized controlled-experiment phase.
 
-## Milestone 1 — map the Codex CLI lifecycle
+The research report is source/documentation evidence. Runtime validation was not performed because no local CLI executable was available. No task pack, recorder, evaluator or replay tool is implemented yet.
 
-Status: source/documentation research delivered on 2026-09-06 in [Research Report](RESEARCH_REPORT.md). Runtime observation remains unperformed; the report records the pinned source revision and access limitations.
+## Phase 2.1 — define and validate initial tasks
 
-Research session/turn entry, tool execution, completion, interruption, and resumption where supported. Pin the examined version and cite evidence.
+Write contracts for a Rust parser repair, data-preserving migration and process-supervision repair. Implement the parser fixture/evaluator first, then extend to the other two.
 
-Done when: `docs/RESEARCH_REPORT.md` explains verified boundaries and explicitly marks unknowns.
+Done when each fixture is versioned and its evaluator rejects the broken baseline and representative incomplete fixes while accepting a reference solution. Reference solutions and withheld tests must not be available to the agent.
 
-## Milestone 2 — identify observable events
+## Phase 2.2 — validate capture and define schemas
 
-Status: source-backed inventory and minimal capture recommendation delivered in [Research Report](RESEARCH_REPORT.md). Live traces, interruption behavior, and target-release compatibility still require runtime validation.
+Observe a real run on the installed CLI; document version/configuration and selected surface. Define minimal task, run, event and result contracts with native provenance and explicit missing data.
 
-Inventory user-accessible surfaces and native events. Trace tool calls and results, identifiers, ordering, output transformations, and visibility limits.
+Done when observed fixtures support the schemas and known gaps are recorded. Legacy schemas do not satisfy this milestone.
 
-Done when: the research report includes an evidence-backed inventory and recommends one minimal capture surface. Milestones 1 and 2 form the research handoff; no implementation is required.
+## Phase 2.3 — capture and evaluate one autonomous run
 
-## Milestone 3 — design a simple event schema
+Run the parser task in a fresh workspace, capture existing exposed events, freeze its final artifact, and evaluate externally.
 
-After the research report is reviewed, define a small envelope for verified observations. Preserve native payloads, source/version provenance, correlation identifiers where available, and distinctions between source and capture metadata.
+Done when a run bundle includes prompt/provenance, native records, diagnostics, termination, artifact manifest, per-requirement results and separate capture-fidelity assessment. Validate failure/interruption handling too.
 
-Done when: a documented schema and sanitized fixtures express known events and missing data without invented information. The original task/trajectory schemas do not fulfill this milestone.
+## Phase 2.4 — extend across the initial three domains
 
-## Milestone 4 — export JSONL logs
+Apply the same workflow to migration and process supervision. Repeat clean runs to assess reproducibility and variability.
 
-Capture through the selected existing surface and export one event record per line. Document ordering, partial records, interruption, sensitive-data handling, and coverage limits.
+Done when every task has a validated evaluator and at least one attempted run with an honest result bundle. Do not discard unsuccessful attempts or require identical agent trajectories.
 
-Done when: a small session produces parseable JSONL whose records can be traced to their source.
+## Phase 2.5 — offline inspection and replay
 
-## Milestone 5 — replay a session
+Display captured activity with supported call/result links, artifact references and clearly separated evaluator outcomes.
 
-Display recorded activity in order and show tool relationships only when supported by captured identifiers. Make incomplete sessions and unknown events visible.
+Done when a reader can inspect evidence and gaps without executing tools or contacting a model.
 
-Done when: a user can inspect the recorded session without contacting a model or rerunning tools.
+## Later domain expansion
+
+HTTP, concurrency, networking, observability, packaging, frontend and local security-repair tasks are documented in the [domain backlog](EXPERIMENT_PLAN.md#broader-domain-backlog). Expand after the initial three establish a useful capture/evaluation workflow.
 
 ## Deferred scope
 
-Multi-agent frameworks, other agent adapters, benchmarking, trajectory ranking, dataset generation, and model training are outside this roadmap.
+Multi-agent frameworks, additional agent adapters, model comparison/leaderboards, trajectory ranking, training-data production, fine-tuning and learned verifiers.

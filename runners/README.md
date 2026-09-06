@@ -1,7 +1,7 @@
-# Codex CLI observation
+# Autonomous Codex execution and capture
 
-This directory is reserved for possible future capture work after the [research handoff](../docs/RESEARCH_PLAN.md).
+Future phase-2 runners create a fresh task workspace, launch one Codex CLI agent under the declared contract, capture existing exposed events, and freeze the final artifact for independent evaluation.
 
-Focus on one existing user-accessible Codex CLI surface. The next agent should recommend that surface in a research report, not implement a runner or modify Codex internals.
+Validate the actual installed CLI and capture surface first. Keep stdout events, stderr, initial prompt/configuration, process termination and collector metadata distinct. Record timeouts, intervention, resume and capture gaps. Do not silently expand permissions or supply corrective prompts to preserve an apparent autonomous success.
 
-Multiple agent adapters and orchestration are outside the current scope.
+The initial recommendation is exec JSON, subject to the [Research Report](../docs/RESEARCH_REPORT.md). App-server requires a documented choice if richer events are necessary. No runner is implemented yet; see [Experiment Plan](../docs/EXPERIMENT_PLAN.md).
