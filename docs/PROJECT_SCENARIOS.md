@@ -2,6 +2,8 @@
 
 Review started 2026-09-06. Scope: the eight repositories in the [profile's Selected work](https://github.com/gracee3/gracee3/blob/HEAD/README.md), including their accessible development branches and historical work. This replaces the narrower adapter-first discovery checklist.
 
+This pass covers the profile's eight Selected work repositories, not every repository on the account. Histories were inventoried and the relevant diffs and evidence were selected for deeper reading. Coverage is stated per repository; it does not include every deleted branch, unreachable commit or private local artifact.
+
 The goal is to identify turning points and engineering lessons, then develop detailed scenario prompts. A scenario may be a code repair, a diagnosis from supplied evidence, an experiment-design exercise, or a question with an objectively checkable answer. No adapter architecture or scenario implementation is prescribed here.
 
 ## Reading the evidence
@@ -94,7 +96,7 @@ Reviewed main at `b019546`, all ten main-history commits, the two listed develop
 
 ## native-asr
 
-Reviewed main at `b5b08cb` (31 visible commits), all 11 listed branches, all six returned PR records, and separate histories for bounded adjudication, tie-only adjudication, the experimental two-pass cascade, and the unmerged Tromso companion. Source diffs and acceptance notes were inspected for the areas below.
+Reviewed main at `b5b08cb` (32 visible commits), all 11 listed branches, all five returned PR records (PRs #2–#6), and separate histories for bounded adjudication, tie-only adjudication, the experimental two-pass cascade, and the unmerged Tromso companion. Source diffs and acceptance notes were inspected for the areas below.
 
 ### ASR-1 — Detect silent batch failure and recover without corrupting accounting
 
@@ -155,7 +157,7 @@ The useful lesson is not another attempt to constrain the adjudicator more tight
 
 ## qwen38-int8-lab
 
-Reviewed main at `4494971`, the returned complete 61-commit history, all eight listed branches, all 16 PR records, and targeted implementation diffs plus architecture, candidate, evaluation, and recovery reports. The current recovery report is newer than the PR #14 description and adds RTX 3090 evidence; the narrower older description must not overwrite that result.
+Reviewed main at `4494971`, the returned complete 63-commit history, all eight listed branches, all 16 PR records, and targeted implementation diffs plus architecture, candidate, evaluation, and recovery reports. The current recovery report is newer than the PR #14 description and adds RTX 3090 evidence; the narrower older description must not overwrite that result.
 
 ### QINT-1 — Separate the transformation target from the graph execution boundary
 
@@ -502,3 +504,30 @@ Reviewed main at `b42316f`, all 191 main-history commits returned across two pag
 - That provenance stop is a useful evidence-review prompt: distinguish a reproducibility checksum from the specific trusted-origin evidence required by a supplied project contract. Do not silently redefine the contract to make the gate pass.
 - Exact-device versus follow-default selection, source disappearance/recovery and cumulative counters have live evidence in PR #8. This could become a separate device-state scenario later.
 - The Phase 5 document records the repaired implementation run; PR #9 records the subsequent final documentation-inclusive commit run. Keep their slightly different callback counts and timings attached to their own revisions rather than merging them into one experiment.
+
+## Cross-project ideas for later review
+
+The catalog now contains 40 primary areas, five per project. The next step is to review the turning points with the owner and choose which ones deserve full scenario prompts. A small scenario can retain a difficult judgment even when its inputs are a short log, a graph, a manifest or a few numerical values.
+
+- **Diagnose from a frozen evidence packet:** combine the style of WX-1, QINT-3, QINT-4 and OBS-3. Supply logs from several layers and ask for the root cause, disconfirming evidence and smallest justified next action.
+- **Decide whether an experiment established its claim:** use the native-ASR adjudication result, GPT-5, OBS-5 or DLL-4. The correct answer may be acceptance within a limited scope, another discriminating experiment, or a no-go decision.
+- **Find a counterexample:** derive small numerical or state examples from GPT-2, DLL-2, DLL-5 and MIR-5. Require an exact answer or independent calculation, not a large implementation.
+- **Reduce an event history:** MIR-1, MIR-3, MAG-3 and MAG-4 can become deterministic prompts asking which state, events and resources remain valid after reordered completions, retries or reconnects.
+- **Audit a deliverable or recovery plan:** WX-4, ASR-5, QINT-2, QINT-5 and MAG-5 provide manifests, staged files and crash points with objectively checkable publication decisions.
+- **Evaluate the evaluator:** DLL-3/DLL-4, Mirabile's browser references and Magnolia's failed post-soak lifecycle gate show how a passing check can miss the actual claim. Ask what the test proves and what additional observation would distinguish the alternatives.
+- **Preserve meaning across representation:** transcript consensus, numerical packing, circular label placement and telemetry summaries differ in domain, but all require an explicit account of information lost, retained or transformed.
+
+These are scenario families to consider, not a shared adapter design. Each may become a detailed prompt, a prompt with data, a small extracted repair, or a later hybrid harness.
+
+## Review and extraction TODO
+
+- [ ] For each project, ask the owner which documented moment was actually difficult and what changed their understanding. Add missing constraints or the decisive observation alongside the Git evidence.
+- [ ] Mark which primary areas to keep, split or defer. Leave additional leads visible; do not turn every interesting commit into a scenario.
+- [ ] For each selected area, preserve the starting revision, solved revision and relevant intermediate failed attempts. Identify any required logs, fixtures or screenshots that currently exist only outside Git.
+- [ ] Write the full prompt with explicit supplied evidence, task outcome, permitted assistance and resource budget. Keep solution-bearing diffs and hidden checks out of the agent's starting materials.
+- [ ] Define the answer key in terms of observable correctness, including justified alternative solutions and valid “insufficient evidence” or no-go answers.
+- [ ] Decide separately whether the task needs execution. Use an answer-only or evidence-analysis task when that captures the turning point faithfully.
+- [ ] Run a small pilot only after the prompt and answer key are reviewable. Record unsuccessful attempts, successful continuations, hints and evaluator mistakes rather than collapsing them into one pass/fail label.
+- [ ] Compare captured trajectories with the scenario's actual evidence needs before considering any quantization-calibration export.
+
+An attempt that does not solve the task in one run is not automatically a bad trajectory. It may reveal a useful diagnosis, a legitimate blocker, a flawed task or evaluator, or a successful recovery after new evidence. Git can help identify those moments; complete execution logs are needed to judge the actual agent run. Neither this review nor a future replay should infer hidden reasoning.
