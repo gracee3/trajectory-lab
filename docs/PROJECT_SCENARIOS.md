@@ -21,7 +21,7 @@ Prompt seeds and proposed acceptance checks below are new scenario ideas. They a
 - [x] native-asr
 - [x] qwen38-int8-lab
 - [x] gpt-oss-rs, including heterogeneous/Tiger Lake work
-- [ ] supermicro-observability
+- [x] supermicro-observability
 - [ ] digital-liquid-light-lab
 - [ ] Mirabile
 - [ ] Magnolia
@@ -272,3 +272,59 @@ A useful evidence-only scenario asks the agent to step back: is this still a lif
 - The 151 branch names reveal extensive numerical localization and source-attribution work. A future prompt could ask which new observation would discriminate competing causes, instead of requesting another narrowly scoped patch.
 - Fresh oracle and converted-GGUF identity are further reproducibility scenarios: identical model names are not identical evidence artifacts.
 - Retain successful H7 work even though it was excluded from the release tree; archival disposition is not failure.
+
+## supermicro-observability
+
+Reviewed main at `a1d239f`, all 13 main-history commits, all five listed branches, and all five PR records. Inspected configuration, installation and observation diffs, GPU sampler code/tests, and the dated deployment methodology. Hardware observations below belong to that recorded deployment.
+
+### OBS-1 — Separate fresh measurements from a process that is merely alive
+
+- **Turning point:** the Rust GPU exporter uses one persistent 250 ms sampler, retains latest values and rolling summaries, and exposes sample age and sampler health separately. Reversed GPU output order and changed indices must not attach measurements to the wrong device.
+- **Evidence:** [exporter implementation and eight tests](https://github.com/gracee3/supermicro-observability/blob/a1d239f53b1e2eece262ab611ea4f46bf5f9e1c0/gpu-exporter/src/main.rs); [generalization diff](https://github.com/gracee3/supermicro-observability/commit/997c31263dd71b355374697e587db44c9ca4ae71). Tests cover missing values, malformed rows, GPU identity changes, stale data and bounded restart backoff.
+- **Status:** code/test-backed; [PR #1](https://github.com/gracee3/supermicro-observability/pull/1) reports eight Rust tests and a live check with two fresh GPU series.
+- **Prompt seed:** supply a timestamped two-device stream containing reordered rows, unavailable fields and a stalled producer. Ask which values remain usable, which health signals must change, and how to preserve device identity across recovery.
+- **Checkable outcome:** unavailable values are not zero; retained values carry age; stale sampling is unhealthy even if HTTP works; device reassignment does not merge histories; retry delay remains bounded.
+- **Broader lesson:** successful transport does not establish current evidence. This can become an evidence-classification prompt without a running GPU.
+
+### OBS-2 — Turn a machine-specific deployment into a reusable system without losing its constraints
+
+- **Turning point:** checked-in host assumptions became explicit optional profiles and private generated configuration. Storage references resolve to stable host-local devices, while a neutral container path exposes only the selected SMART device. Protected devices stay excluded; monitoring consumes cached fan metrics without owning fan control.
+- **Evidence:** [configuration refactor `997c312`](https://github.com/gracee3/supermicro-observability/commit/997c31263dd71b355374697e587db44c9ca4ae71); [PR #1 migration report](https://github.com/gracee3/supermicro-observability/pull/1). The report records six healthy containers, one allowed SMART device, the protected disk still read-only/unmounted and absent from metrics, and an uninterrupted fan service.
+- **Status:** demonstrated for the reported deployment, with configuration and exporter tests. It does not establish portability of the original cooling calibration.
+- **Prompt seed:** supply a redacted device topology, collector configuration and two deployment profiles. Ask for a migration plan that preserves the existing invariants while removing hard-coded identities.
+- **Checkable outcome:** identify which device each path resolves to; select only the allowed collector targets; preserve optional features as opt-in; keep fan control external; avoid treating an empty exclusion set as a pattern matching every device.
+- **Broader lesson:** generalization means separating mechanisms, local identities and policy. Merely substituting variable names is insufficient.
+
+### OBS-3 — Diagnose a false health failure during an operational handoff
+
+- **Turning point:** the local-first workflow separated checkout operation from optional system installation and preserved configuration, credentials and data. Live verification then found that Grafana listened on the selected private address while its health probe still queried loopback.
+- **Evidence:** [`3ffe6c4` implementation](https://github.com/gracee3/supermicro-observability/commit/3ffe6c4c5136436c09b187024f0e55b78937cc64), particularly the Compose health-check address and lifecycle ownership guards; [PR #3](https://github.com/gracee3/supermicro-observability/pull/3) includes the subsequent live correction.
+- **Status:** the bind/probe correction and checkout handoff are demonstrated by the historical live report. Optional system promotion has implementation/static validation evidence; the initial validation explicitly did not perform a system installation.
+- **Prompt seed:** present a service reachable by the user but marked unhealthy, its bind settings, health probe and two possible lifecycle owners. Ask for the smallest justified correction and a state-preserving handoff plan.
+- **Checkable outcome:** align probe and actual listener; avoid broadening the listener to hide the error; prevent competing stack owners; preserve monitoring history and credentials; distinguish uninstall from explicit data removal.
+- **Broader lesson:** deployment failures can be disagreements between configuration layers, even when the underlying service is working.
+
+### OBS-4 — Make an agent observation interface bounded and semantically honest
+
+- **Turning point:** a single Python core added fixed-profile JSON observations and a STDIO interface, with limits on query windows, points, response bytes and labels. Disabled optional data differs from missing enabled data; absent private salt suppresses GPU dimensions.
+- **Evidence:** [observation interface `8207c5c`](https://github.com/gracee3/supermicro-observability/commit/8207c5cc275f5e05d17734b52b918652851c083a); [observation tests](https://github.com/gracee3/supermicro-observability/blob/a1d239f53b1e2eece262ab611ea4f46bf5f9e1c0/tests/test_observation.py); [PR #4](https://github.com/gracee3/supermicro-observability/pull/4) reports 27 Python tests and one successful bounded live snapshot.
+- **Status:** demonstrated at those reported scopes. The live snapshot output was discarded, so it is not a retained replay fixture.
+- **Prompt seed:** provide synthetic query responses with non-finite numbers, missing optional metrics, excess series, raw identifiers and malformed replies. Ask for the correct normalized observation and error classification.
+- **Checkable outcome:** obey the 24-hour window, 600 query-point and 120 returned-point per-series limits, 10,000 total returned points and 4 MiB response bound; retain only permitted dimensions; produce deterministic summaries; keep protocol stdout clean.
+- **Broader lesson:** a useful agent interface includes uncertainty and resource limits in its meaning. A prompt with expected JSON could test this independently of an adapter.
+
+### OBS-5 — Evaluate the observer's cost without overstating the experiment
+
+- **Turning point:** the project defined a monitoring budget and moved machine-specific observations into a dated case study with explicit reproduction requirements and limitations.
+- **Evidence:** [methodology](https://github.com/gracee3/supermicro-observability/blob/a1d239f53b1e2eece262ab611ea4f46bf5f9e1c0/docs/METHODOLOGY.md); [deployment report](https://github.com/gracee3/supermicro-observability/blob/a1d239f53b1e2eece262ab611ea4f46bf5f9e1c0/docs/deployments/x11spa-tf-dual-rtx3090.md), separated from generic claims in `997c312`.
+- **Status:** demonstrated as one deployment-budget observation. The five-minute run recorded 1.885% of one logical CPU for the fast exporter, 8.498% for the stack and 285.8 MiB peak aggregate container memory. This is not a comparative benchmark.
+- **Prompt seed:** supply those measurements, acceptance thresholds and a tempting claim that the monitoring stack is universally negligible. Ask whether the local budget passed, what the CPU denominator means and what further evidence a general claim requires.
+- **Checkable outcome:** correctly compare the local values with the 2%, 10% and 1 GiB thresholds; avoid dividing by or multiplying across cores incorrectly; refuse to derive confidence intervals or long-term disk growth from insufficient samples.
+- **Broader lesson:** determining the strongest supported conclusion is itself a solved engineering task, even when the answer contains no code.
+
+### Additional ideas and unresolved boundaries
+
+- Dashboard iteration in [PR #5](https://github.com/gracee3/supermicro-observability/pull/5) offers a separate visual-reasoning family: mixed units need meaningful axes, and hidden legend labels can still require identity in the hover data. Review actual rendered panels before calling a visual fix proven.
+- Cached fan samples provide a data-only exercise: an active controller flag does not establish fresh or safe cooling. Use sample timestamps and separate health fields from the [fan contract](https://github.com/gracee3/supermicro-observability/blob/a1d239f53b1e2eece262ab611ea4f46bf5f9e1c0/docs/FAN-METRICS.md).
+- The public/private-address validator deserves boundary review before reuse: the current test accepts a documentation-range address. Define the intended address policy explicitly instead of treating a library's broad “private” classification as a complete specification.
+- No inspected artifact establishes a failed fan-control trajectory here. Keep cooling-controller hypotheses separate from this repository's monitoring-only evidence.
