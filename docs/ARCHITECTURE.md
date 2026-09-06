@@ -1,88 +1,17 @@
-# Architecture
+# Architecture status
 
-## Design principles
+Architecture is provisional until the [research report](RESEARCH_PLAN.md) establishes which Codex CLI events are exposed and how they can be observed.
 
-1. **Raw first.** Capture complete trajectories before converting them to any training-specific format.
-2. **Verifier-first selection.** Teacher/model identity is metadata, never the acceptance criterion.
-3. **Reproducibility.** Every run should identify the task, repository, base commit, environment image, model, agent scaffold, prompt/configuration, and evaluator version.
-4. **Training/eval isolation.** Held-out evaluation tasks must never enter accepted training data.
-5. **Outcome before process.** Executable correctness dominates stylistic or efficiency preferences.
-6. **Model-agnostic interfaces.** Runners should normalize different agents into a common event stream.
+The intended lab has three small responsibilities:
 
-## Components
+1. Observe an existing user-accessible Codex CLI surface.
+2. Preserve its records in a simple, documented JSONL representation.
+3. Replay those records for educational inspection.
 
-### Tasks
-A task defines the initial repository state, user instruction, environment, validation commands, and split (`train`, `dev`, or `held-out`). Dataset adapters may import SWE-style tasks while custom task packs can focus on Rust, Linux, shell, networking, containers, and observability.
+The research phase must select the surface before choosing an implementation. Do not assume all execution modes expose identical events or that an internal event type is publicly available.
 
-### Environments
-Each attempt should start from a clean, reproducible environment. Container images are preferred where practical. A run must not inherit mutable state from an earlier attempt.
+Preserve source/version provenance and native payloads. Distinguish source identifiers and timestamps from identifiers or timestamps added by the collector. Document gaps, transformations, and any redaction. A normalized record must not imply access to unobserved model inputs or internal state.
 
-### Runners
-A runner launches an agent/model and emits normalized events such as assistant messages, tool calls, tool results, patches, and final responses. Native agent transcripts should also be retained when possible.
+Replay is a display operation over recorded data; it must not rerun tools or request new model responses.
 
-### Trajectory store
-The canonical trajectory is richer than an SFT message list. It includes provenance, execution events, resource usage, final diff, validation outputs, and evaluator results.
-
-### Evaluators
-Evaluators operate in layers:
-
-- deterministic outcome gates: build, test, target behavior
-- regression gates
-- diff/scope checks
-- process metrics: repeated reads, command count, failed hypotheses, recovery behavior
-- optional learned verifier scores later
-
-### Acceptance
-Acceptance policies consume evaluator outputs and produce a decision plus reason. Policies should be versioned so historical datasets remain reproducible.
-
-### Exporters
-Exporters transform accepted raw trajectories into downstream formats without mutating the originals. Planned targets include Qwen-style SFT chat data, preference pairs, and verifier datasets.
-
-## Data flow
-
-```text
-Task Manifest
-    |
-    v
-Environment Builder ---> clean workspace
-    |
-    v
-Runner / Agent ---> normalized event stream ---> raw trajectory
-                                             |
-                                             v
-                                         evaluators
-                                             |
-                                             v
-                                      score + verdict
-                                             |
-                                  +----------+----------+
-                                  |                     |
-                               reject                accept
-                                                        |
-                                                        v
-                                                    exporters
-```
-
-## Reproducibility identifiers
-
-A run should eventually be reproducible from at least:
-
-- `task_id`
-- repository URL and immutable base commit
-- environment/container digest
-- runner and agent version
-- model identifier/checkpoint
-- system/developer/user prompt hashes
-- sampling/inference configuration
-- evaluator version
-- acceptance-policy version
-
-## Non-goals for the initial scaffold
-
-- training framework implementation
-- learned reward-model training
-- large-scale orchestration
-- online reinforcement learning
-- storing giant generated corpora directly in Git
-
-The first useful vertical slice is deliberately small: one task format, one runner, one reproducible environment, deterministic evaluation, and a lossless trajectory artifact.
+The previous multi-model runner, scoring, acceptance, and training-export architecture is superseded. See [Vision](VISION.md) for scope and [Roadmap](ROADMAP.md) for sequencing.

@@ -1,15 +1,7 @@
-# Evaluators
+# Observation fidelity
 
-Evaluators score a completed attempt. Deterministic outcome checks come first; process metrics are secondary ranking signals.
+Future checks should validate capture and replay fidelity: faithful records, explicit gaps, supported event relationships, and replay without tool execution.
 
-Initial evaluator families:
+Model scoring, trajectory ranking, acceptance policies, and learned verifiers are outside this phase.
 
-- target behavior / regression tests
-- build and compiler checks
-- lint and formatting checks
-- diff scope / unrelated-change detection
-- tool-use and repeated-work metrics
-- recovery behavior after failed commands or tests
-- final-response validation against actual results
-
-Hard correctness failures should normally make a trajectory ineligible regardless of soft process scores. Evaluator versions must be recorded with every score artifact.
+See [Evaluation](../docs/EVALUATION.md). No evaluator implementation is requested by the research handoff.

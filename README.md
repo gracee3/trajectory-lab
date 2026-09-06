@@ -1,99 +1,43 @@
-# trajectory-lab
+# Trajectory Lab
 
-A public lab for generating, capturing, scoring, filtering, and exporting agentic software-engineering trajectories.
+Trajectory Lab is an educational project focused on understanding the observable execution lifecycle of Codex CLI by instrumenting events that are already exposed to the user.
 
-The project is designed around a simple principle: **the verifier, not the teacher model, is the source of truth**. Multiple models and agent scaffolds can attempt the same task inside reproducible environments. The lab preserves the full interaction, evaluates the final outcome and selected process signals, accepts the strongest trajectories, and exports them into training or preference-learning formats.
+The goal is to learn where a session begins, how tool calls and results move through it, what the user can observe, and how those observations can be recorded and replayed. **Observe, don't infer.** An event log describes exposed execution activity; it does not explain the model's private reasoning.
 
-## Goals
+## Start here
 
-- Build reproducible task environments for repository-level software engineering.
-- Compare multiple models and agent scaffolds on identical tasks.
-- Capture raw trajectories losslessly before converting them into training formats.
-- Score outcomes with deterministic tests first, then add process-level evaluators where useful.
-- Produce high-quality datasets for SFT, rejection-sampling fine-tuning, preference optimization, verifier training, and model/agent evaluation.
-- Keep held-out evaluation tasks separate from training data.
-- Support systems-oriented workloads, especially Rust, Linux, shell, containers, networking, observability, and tool-using coding agents.
+- [Vision](docs/VISION.md): why this lab exists and its boundaries.
+- [Research Plan](docs/RESEARCH_PLAN.md): questions and the research-only handoff for the next Codex agent.
+- [Roadmap](docs/ROADMAP.md): milestones and completion criteria.
 
-## Proposed pipeline
+## Non-goals
 
-```text
-task
-  ↓
-clean reproducible environment
-  ↓
-N model / agent attempts
-  ↓
-raw trajectory capture
-  ↓
-outcome + process evaluation
-  ↓
-score / rank / reject
-  ↓
-accepted trajectories
-  ↓
-exports: SFT / preference pairs / verifier data
-  ↓
-train candidate model
-  ↓
-held-out evaluation
-```
+- Accessing hidden reasoning or reconstructing chain of thought.
+- Inferring private model state, intent, or unexposed context from visible activity.
+- Building a multi-agent framework or supporting multiple agents at this stage.
+- Training or fine-tuning models, generating training datasets, ranking models, or building a benchmark platform.
+- Reimplementing Codex CLI or adding instrumentation to its internals before understanding existing user-accessible surfaces.
 
-## Repository layout
+## Milestones
 
-```text
-trajectory-lab/
-├── docs/                 Design notes and schemas
-├── tasks/                Task definitions and dataset adapters
-│   ├── swe/
-│   ├── rust/
-│   ├── linux/
-│   └── agentic/
-├── runners/              Agent/model adapters
-├── environments/         Reproducible task environments
-├── evaluators/           Outcome and process evaluators
-├── trajectories/         Raw trajectory metadata/examples (large data ignored)
-├── scores/               Evaluation outputs (large/generated data ignored)
-├── accepted/             Accepted trajectory manifests
-├── exporters/            SFT / preference / verifier dataset exporters
-├── eval/                 Held-out evaluation definitions
-├── schemas/              Machine-readable schemas
-└── examples/             Small checked-in examples
-```
+1. **Map the Codex CLI lifecycle.** Research session and turn boundaries, tool execution, completion, interruption, and resumption where supported.
+2. **Identify observable events.** Inventory existing user-accessible surfaces, their payloads, relationships, limitations, and version dependencies.
+3. **Design a simple event schema.** Use the research findings to represent observed records without inventing missing information.
+4. **Export JSONL logs.** Capture one record per line with provenance and explicit handling of incomplete or unavailable data.
+5. **Replay a session.** Display a recorded session in order, including visible tool activity and results. Replay means inspecting the log, not rerunning commands.
 
-## Initial scoring philosophy
+These are planned milestones, not claims about features already implemented or events already verified.
 
-Start with outcome verification because software engineering gives unusually strong ground truth:
+## Current status and layout
 
-- functional correctness and target tests
-- no regressions
-- compile / lint / formatting gates
-- patch scope and unrelated-change checks
-- successful recovery after failed hypotheses
-- tool-use efficiency and repeated-work signals
-- honest final validation
+The repository contains documentation and preliminary schemas from an earlier, broader trajectory-generation proposal. There is no implemented recorder, exporter, or replay tool yet.
 
-Process metrics should complement, not override, executable correctness.
+| Path | Current role |
+|---|---|
+| `docs/` | Vision, research handoff, roadmap, and provisional design notes |
+| `schemas/` | Legacy draft task/trajectory schemas; not the new event contract |
+| `runners/` | Notes for future Codex CLI capture work |
+| `tasks/` | Notes for future small observation scenarios |
+| `evaluators/` | Notes on capture and replay fidelity |
 
-## Dataset strategy
-
-The lab should support existing task sources such as SWE-style executable repository tasks plus custom Rust/Linux/system-engineering tasks. Candidate trajectories can be generated by different models, different prompts, or repeated samples from the same model.
-
-A trajectory is accepted because it passes verifiers and scores well—not because a particular model generated it.
-
-## Training uses
-
-The same raw corpus can later support:
-
-- supervised fine-tuning (SFT)
-- rejection-sampling fine-tuning
-- preference datasets (chosen vs. rejected trajectories)
-- verifier / reward-model training
-- prompt and scaffold comparisons
-- quantization regression testing
-- context-management and tool-efficiency studies
-
-## Status
-
-This repository is intentionally an early scaffold. The first implementation milestone is to define a stable trajectory schema, a task manifest, one reproducible runner, and deterministic evaluators for a small Rust task set.
-
-See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md), [`docs/TRAJECTORIES.md`](docs/TRAJECTORIES.md), [`docs/EVALUATION.md`](docs/EVALUATION.md), and [`docs/ROADMAP.md`](docs/ROADMAP.md).
+The current direction supersedes the original multi-model training-data pipeline. Existing schemas are retained for reference and must not determine the new event design. The next deliverable is a research report, not code.

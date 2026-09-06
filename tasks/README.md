@@ -1,14 +1,7 @@
-# Tasks
+# Observation scenarios
 
-Task definitions describe what an agent must solve and how the task environment is reconstructed.
+Future examples should be small, benign Codex CLI sessions that help explain verified lifecycle boundaries and tool-call/result flows.
 
-Planned task families:
+Research may use disposable workspaces for observation and document exact reproduction steps. This is not a benchmark task pack or training-data generation system.
 
-- `swe/` — imported SWE-style repository tasks
-- `rust/` — Rust compiler, test, refactor, and feature tasks
-- `linux/` — Linux/system administration tasks
-- `agentic/` — long-horizon and tool-use behavior tasks
-
-Each task should eventually declare an immutable repository/base commit, user instruction, environment image or build recipe, validation commands, provenance/license metadata, and dataset split.
-
-Held-out tasks must never be reused for training trajectory generation.
+Choose scenarios after identifying the available surface and its limits. See the [Research Plan](../docs/RESEARCH_PLAN.md).

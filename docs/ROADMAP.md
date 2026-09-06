@@ -1,67 +1,43 @@
 # Roadmap
 
-## Milestone 0 — scaffold
+The current scope is an educational study of Codex CLI's observable execution lifecycle. This roadmap supersedes the earlier training-data pipeline.
 
-- [x] Define project scope and repository layout.
-- [x] Document trajectory and evaluation philosophy.
-- [ ] Add machine-readable trajectory schema.
-- [ ] Add machine-readable task manifest schema.
-- [ ] Add one checked-in example trajectory.
+## Foundation — documentation
 
-## Milestone 1 — first vertical slice
+- [x] State the educational purpose and non-goals.
+- [x] Add Vision and a research-only handoff.
+- [x] Mark legacy schemas and broader pipeline plans as superseded.
 
-Target: one reproducible Rust task end to end.
+## Milestone 1 — map the Codex CLI lifecycle
 
-- task manifest
-- clean containerized environment
-- one runner adapter
-- normalized event capture
-- final git diff capture
-- deterministic evaluator
-- score/verdict artifact
-- accepted/rejected split
+Research session/turn entry, tool execution, completion, interruption, and resumption where supported. Pin the examined version and cite evidence.
 
-Success criterion: the same task can be rerun from a clean state and produces an auditable trajectory plus evaluator output.
+Done when: `docs/RESEARCH_REPORT.md` explains verified boundaries and explicitly marks unknowns.
 
-## Milestone 2 — candidate generation
+## Milestone 2 — identify observable events
 
-- run N attempts per task
-- support multiple model/agent adapters
-- rank passing solutions
-- rejection-sampling acceptance policy
-- token, timing, and tool-use metrics
+Inventory user-accessible surfaces and native events. Trace tool calls and results, identifiers, ordering, output transformations, and visibility limits.
 
-## Milestone 3 — dataset export
+Done when: the research report includes an evidence-backed inventory and recommends one minimal capture surface. Milestones 1 and 2 form the research handoff; no implementation is required.
 
-- Qwen-compatible SFT exporter
-- preference-pair exporter
-- verifier-example exporter
-- dataset manifest with provenance and hashes
+## Milestone 3 — design a simple event schema
 
-## Milestone 4 — broader systems task packs
+After the research report is reviewed, define a small envelope for verified observations. Preserve native payloads, source/version provenance, correlation identifiers where available, and distinctions between source and capture metadata.
 
-- Rust repository repair
-- shell / CLI tasks
-- Linux service debugging
-- Docker/container tasks
-- networking and observability tasks
-- multi-file feature work
-- failure-recovery tasks
+Done when: a documented schema and sanitized fixtures express known events and missing data without invented information. The original task/trajectory schemas do not fulfill this milestone.
 
-## Milestone 5 — training loop
+## Milestone 4 — export JSONL logs
 
-- baseline model evaluation
-- small LoRA/SFT experiment
-- post-training held-out evaluation
-- quantize tuned checkpoint
-- post-quantization regression evaluation
+Capture through the selected existing surface and export one event record per line. Document ordering, partial records, interruption, sensitive-data handling, and coverage limits.
 
-## Research questions
+Done when: a small session produces parseable JSONL whose records can be traced to their source.
 
-- How many high-quality trajectories are needed before a 27B model shows measurable gains?
-- Is one best trajectory per task better than several diverse passing trajectories?
-- Which failed intermediate steps are useful to retain during SFT?
-- How strongly should process efficiency affect selection after correctness gates pass?
-- Do model-specific tool formats transfer cleanly through a normalized trajectory representation?
-- Which gains survive W8A8 quantization?
-- Can trajectory-derived verifiers improve best-of-N inference before additional training?
+## Milestone 5 — replay a session
+
+Display recorded activity in order and show tool relationships only when supported by captured identifiers. Make incomplete sessions and unknown events visible.
+
+Done when: a user can inspect the recorded session without contacting a model or rerunning tools.
+
+## Deferred scope
+
+Multi-agent frameworks, other agent adapters, benchmarking, trajectory ranking, dataset generation, and model training are outside this roadmap.
