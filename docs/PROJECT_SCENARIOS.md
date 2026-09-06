@@ -22,7 +22,7 @@ Prompt seeds and proposed acceptance checks below are new scenario ideas. They a
 - [x] qwen38-int8-lab
 - [x] gpt-oss-rs, including heterogeneous/Tiger Lake work
 - [x] supermicro-observability
-- [ ] digital-liquid-light-lab
+- [x] digital-liquid-light-lab
 - [ ] Mirabile
 - [ ] Magnolia
 
@@ -328,3 +328,61 @@ Reviewed main at `a1d239f`, all 13 main-history commits, all five listed branche
 - Cached fan samples provide a data-only exercise: an active controller flag does not establish fresh or safe cooling. Use sample timestamps and separate health fields from the [fan contract](https://github.com/gracee3/supermicro-observability/blob/a1d239f53b1e2eece262ab611ea4f46bf5f9e1c0/docs/FAN-METRICS.md).
 - The public/private-address validator deserves boundary review before reuse: the current test accepts a documentation-range address. Define the intended address policy explicitly instead of treating a library's broad “private” classification as a complete specification.
 - No inspected artifact establishes a failed fan-control trajectory here. Keep cooling-controller hypotheses separate from this repository's monitoring-only evidence.
+
+## digital-liquid-light-lab
+
+Reviewed all four listed branches, both unmerged PRs, the four-commit bootstrap history, the five-commit interactive history, and all 70 commits reachable from the listed CPU research branch at `c530049`. Main at `729bb99` contains only the initial README. The meaningful implementation and accepted research gates are therefore largely outside main.
+
+### DLL-1 — Keep simulation time deterministic when presentation stalls
+
+- **Turning point:** validated simulation contracts introduced a bounded fixed-step accumulator; the desktop pipeline then connected those contracts to continuous native GPU presentation.
+- **Evidence:** [contract implementation `7467ff3`](https://github.com/gracee3/digital-liquid-light-lab/commit/7467ff359024922e4a1738a65bc41543106d603a); [native pipeline `66e91b4`](https://github.com/gracee3/digital-liquid-light-lab/commit/66e91b46146e13d7194d2bb577f903859e64288d); [clock and regression](https://github.com/gracee3/digital-liquid-light-lab/blob/66e91b46146e13d7194d2bb577f903859e64288d/crates/liquid-light-core/src/lib.rs).
+- **Status:** code/test-backed scheduling; [PR #1](https://github.com/gracee3/digital-liquid-light-lab/pull/1) separately reports five frames presented on Intel Iris Xe/Vulkan. This proves a native pipeline, not fluid physics or performance.
+- **Prompt seed:** give irregular presentation intervals, a fixed simulation step and a catch-up cap. Ask for the simulation advances, interpolation remainder, discarded backlog and replay implications.
+- **Checkable outcome:** the existing 35 ms / 10 ms / two-step case yields two advances, 10 ms discarded and interpolation 0.5. Extend with pause, reset and multiple-frame cases; do not let presentation timing silently change the physical step.
+- **Broader lesson:** a live visual system needs explicit overload semantics. The arithmetic exercise is independently useful before any rendering harness.
+
+### DLL-2 — Preserve the conservation certificate through the actual numerical representation
+
+- **Turning point:** the HDA-003 review showed why a mathematically equivalent rate form was not an adequate floating-point authority. The corrected contract keeps certified stored cell-volume increments and one shared integrated value per face all the way into continuity assembly.
+- **Evidence:** [integrated-continuity correction `c8d32e1`](https://github.com/gracee3/digital-liquid-light-lab/commit/c8d32e1b77ec38b599ce5e3cf90c76dda5490f3a); [Review E closure](https://github.com/gracee3/digital-liquid-light-lab/blob/c5300491883993a66234f15e848ec5506adcdead/docs/research/reviews/review-e-hda003-integrated-continuity-closure.md); later [Review N production-object mutation checks](https://github.com/gracee3/digital-liquid-light-lab/blob/c5300491883993a66234f15e848ec5506adcdead/docs/research/reviews/review-n-h-wp4-review-m-correction-closure.md).
+- **Status:** the specification finding was closed, then implementation evidence demonstrated that a prohibited divide/remultiply mutation fails native-bit regressions at two time steps.
+- **Prompt seed:** provide a small closed mesh, certified increments and two algebraically equivalent assembly procedures. Ask which preserves the stated certificate, why the other can fail and which numerical diagnostics remain distinct.
+- **Checkable outcome:** each face is formed once and scattered with opposite signs; the predeclared dependent-cell increment closes the stored-volume certificate; continuity does not reconstruct increments from rounded rates. Distinguish that structural identity from a later numerical sum of materialized rows and from nonlinear convergence.
+- **Broader lesson:** the “same equation” can have different executable contracts. This supports a mathematical explanation or tiny numerical counterexample, not necessarily a full solver task.
+
+### DLL-3 — Prevent a diagnostic computation from impersonating authoritative evidence
+
+- **Turning point:** a card-backed finite-difference wrapper still accepted an arbitrary residual callback, then labeled its result authoritative. The final correction sealed the path to the actual Schedule R residual and prepared state.
+- **Evidence:** [small authority-boundary diff `3f66c29`](https://github.com/gracee3/digital-liquid-light-lab/commit/3f66c29199ca32e52adb394c3692a1fe85404d39); [accepted WP1/WP2 closure review](https://github.com/gracee3/digital-liquid-light-lab/blob/c5300491883993a66234f15e848ec5506adcdead/docs/research/reviews/review-i-h-wp1-wp2-correction-closure-2.md).
+- **Status:** demonstrated by the recorded closure review, test passes and independent mutation checks. Generic callback-based differentiation remains valid as a diagnostic, with a different authority label.
+- **Prompt seed:** show a provenance-rich result produced by an API that permits callers to replace its evaluator. Ask whether its evidence label is justified and how to close the gap without eliminating useful diagnostics.
+- **Checkable outcome:** authoritative construction binds the resolved card, geometry, controls and actual residual internally; callers cannot substitute the measured computation while retaining the stronger label.
+- **Broader lesson:** metadata cannot prove that the claimed operation happened. This generalizes to benchmark wrappers, signing pipelines and evaluation reports.
+
+### DLL-4 — Repair an experiment whose comparisons do not measure the same thing
+
+- **Turning point:** WP3 calibration had to compare accepted free energy across genuine solved tolerance, time-step and grid probes. Earlier logic mixed a state-distance quantity with an energy quantity and did not establish the final solved grid comparison.
+- **Evidence:** [calibration and failure-evidence correction `201fec4`](https://github.com/gracee3/digital-liquid-light-lab/commit/201fec4780f03151406976469d74ea234fc8b436); [Review L accepted closure](https://github.com/gracee3/digital-liquid-light-lab/blob/c5300491883993a66234f15e848ec5506adcdead/docs/research/reviews/review-l-h-wp3-final-correction-closure.md).
+- **Status:** demonstrated for the frozen serial dense fixed-gap CPU oracle. Recorded accepted-energy differences are zero for the two tightest tolerances, approximately 0.000472487 for the two time steps and 0.001442001 for the solved coarse/fine grids. These are numerical-solver calibration results, distinct from the repository owner's downstream quantization-calibration interest.
+- **Prompt seed:** provide a convincing-looking calibration report with mismatched diagnostics and a nominal grid probe. Ask whether the tolerance floor is supported, then specify the minimum corrected comparison.
+- **Checkable outcome:** compare the same observable and physical domain; use consistent cell averages under refinement; actually solve both probes; retain derived inputs and accepted states. Replacing the fine-grid result with the coarse one must invalidate the claimed separation.
+- **Broader lesson:** the evaluator can be wrong even when every computation succeeds. Recovering the experimental question is a valuable trajectory.
+
+### DLL-5 — Validate the motion between endpoints and use independent numerical anchors
+
+- **Turning point:** WP4 Review M corrections bound a smooth rest-to-rest temporal law, its interior rate extrema, a specific spatial construction and the certified gap increment. They also normalized work gates and added a three-cell independent energy derivative check that exposes an interpolation-adjoint sign error.
+- **Evidence:** [moving-gap correction `a919680`](https://github.com/gracee3/digital-liquid-light-lab/commit/a91968057082732e9a4e57e127629b2f63cb1a79); [Review N](https://github.com/gracee3/digital-liquid-light-lab/blob/c5300491883993a66234f15e848ec5506adcdead/docs/research/reviews/review-n-h-wp4-review-m-correction-closure.md); [tracked correction capsule](https://github.com/gracee3/digital-liquid-light-lab/blob/c5300491883993a66234f15e848ec5506adcdead/docs/research/evidence/h/wp4/moving-gap-v2-review-m-corrections/README.md).
+- **Status:** demonstrated for the bounded moving-gap CPU oracle: the review records 17 focused tests, three discriminating mutations, 25 tracked artifact hashes and historical reproduction of 30 generator-owned artifacts. The full ignored raw bundle is not all available in Git.
+- **Prompt seed:** give identical valid endpoints with two possible intervening motions, plus endpoint-subtracted and certified increments. Ask which histories are admitted, which values quadrature must consume and whether a supplied test would catch the wrong derivative.
+- **Checkable outcome:** reject hidden jumps and unsupported spatial shapes; check analytic interior rate maxima; reuse the once-certified increment rather than reconstructing it by endpoint subtraction; make normalized gates invariant under consistent unit changes; use a nontrivial independent derivative anchor.
+- **Broader lesson:** valid endpoints do not prove a valid path, and a symmetric tiny fixture may miss a real coupling error. These can be split into several prompt families later.
+
+### Additional ideas, failed gates and limits
+
+- The review/correction loops themselves are valuable: preserve the original finding, attempted closure, remaining blocker and final discriminating evidence. The initial failure of a gate does not invalidate the successful research trajectory that followed.
+- WP3 also contains a strong atomicity scenario: evidence persistence must succeed before an accepted checkpoint is released; envelope, solve and write failures retain the old-state identity. The final review explicitly checks those failures.
+- Canonical line endings and hash rebinding appear in `690bf61` and `2741753`; unsigned evidence-bit preservation appears in `eb26252`. These are leads for portable evidence serialization, not independently proven claims in this review.
+- [Interactive PR #2](https://github.com/gracee3/digital-liquid-light-lab/pull/2) implements a kinematic plate preview but explicitly leaves RTX presentation, TrackPoint behavior and transport acceptance unverified. Keep “implemented preview” separate from “hardware path accepted.”
+- That PR mentions later Candidate H/Review Q history not present in the listed research branch inspected here. Locate the actual later commits or evidence bundle before adding WP5 outcomes. The accessible branch establishes acceptance through WP4 only.
+- A useful prompt-only lesson is to classify claims: presenting frames, passing CPU invariants, matching physical behavior and winning a benchmark are different achievements.
