@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Rust
+/target/
+
+# Editors / OS
+.DS_Store
+.idea/
+.vscode/
+
+# Local secrets and environment
+.env
+.env.*
+!.env.example
+
+# Generated / potentially large trajectory data
+trajectories/raw/*
+!trajectories/raw/.gitkeep
+scores/generated/*
+!scores/generated/.gitkeep
+accepted/generated/*
+!accepted/generated/.gitkeep
+exports/*
+!exports/.gitkeep
+
+# Local task workspaces and caches
+.worktrees/
+workspaces/
+.cache/
