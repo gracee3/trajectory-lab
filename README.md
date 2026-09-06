@@ -6,6 +6,7 @@ Trajectory Lab is an educational project studying the observable execution lifec
 
 ## Start here
 
+- [Project Scenario Backlog](docs/PROJECT_SCENARIOS.md): working TODO for reviewing existing projects and extracting focused scenarios.
 - [Vision](docs/VISION.md): purpose and boundaries.
 - [Phase 2: Controlled SWE Experiments](docs/EXPERIMENT_PLAN.md): task contracts, initial tasks, broader domains and implementation sequence.
 - [Evaluation](docs/EVALUATION.md): independent artifact checks and capture fidelity.
@@ -15,7 +16,9 @@ Trajectory Lab is an educational project studying the observable execution lifec
 
 ## Next phase
 
-Start with a Rust streaming parser repair, a data-preserving database migration, and a process-supervision bug. Each task gets fixed starting code/data, a reproducible environment, a behavioral contract and protected independent acceptance checks.
+Start by reviewing existing projects with their owner: WhisperX-batch, heterogeneous Tiger Lake work, CPU gpt-oss work, Supermicro/Prometheus observability, and Qwen INT8 quantization. Track code evidence, what was difficult, known solutions, possible fixture boundaries, and independent checks in the [Project Scenario Backlog](docs/PROJECT_SCENARIOS.md). Begin with one issue from WhisperX-batch.
+
+The parser, migration, and supervisor briefs in the experiment plan remain optional examples rather than mandatory first tasks. Each selected scenario will need fixed starting code/data, a reproducible environment, a behavioral contract, and protected independent acceptance checks.
 
 The agent may inspect, implement, test and iterate autonomously within declared resources. Capture its observable trajectory, freeze its final artifact, then evaluate in a clean environment. Preserve failed, interrupted and incomplete attempts as well as successful ones. Different valid implementations and action sequences are expected.
 
@@ -35,12 +38,10 @@ Source/documentation research is published at a pinned upstream commit. Runtime 
 
 This repository contains documentation and legacy draft schemas. There are no implemented task fixtures, recorder, independent evaluator or replay tool yet. The phase-2 update records the authorized next direction, not completed experiments.
 
-| Path | Role |
-|---|---|
-| `docs/` | Vision, completed research, experiment plan, evaluation and roadmap |
-| `tasks/` | Planned versioned SWE fixtures and task contracts |
-| `runners/` | Planned autonomous Codex execution and capture |
-| `evaluators/` | Planned independent artifact checks and capture-fidelity checks |
-| `schemas/` | Legacy drafts; not finalized phase-2 contracts |
+- `docs/`: vision, research, project scenario backlog, experiment plan, evaluation, and roadmap.
+- `tasks/`: planned versioned SWE fixtures and task contracts.
+- `runners/`: planned autonomous Codex execution and capture.
+- `evaluators/`: planned independent artifact checks and capture-fidelity checks.
+- `schemas/`: legacy drafts; not finalized phase-2 contracts.
 
 The initial capture recommendation is `codex exec --json`, with explicit limits on IDs, timing, tool coverage, output, cancellation and usage. App-server is a larger option if the selected experiment needs richer events. See the research report before choosing an adapter.
