@@ -18,7 +18,7 @@ Prompt seeds and proposed acceptance checks below are new scenario ideas. They a
 ## Review progress
 
 - [x] WhisperX-batch
-- [ ] native-asr
+- [x] native-asr
 - [ ] qwen38-int8-lab
 - [ ] gpt-oss-rs, including heterogeneous/Tiger Lake work
 - [ ] supermicro-observability
@@ -91,3 +91,64 @@ Reviewed main at `b019546`, all ten main-history commits, the two listed develop
 - Preserve the progression from shell orchestration to Python control logic as a migration scenario: retain behavior while improving inspectability.
 - Duplicate basenames and resume-output checks suggest a separate artifact-identity problem; current tests cover representative naming but not every possible collision.
 - A successful uninterrupted agent sequence is valuable if its actual transcript survives. The commit chain alone cannot tell us whether it was uninterrupted.
+
+## native-asr
+
+Reviewed main at `b5b08cb` (31 visible commits), all 11 listed branches, all six returned PR records, and separate histories for bounded adjudication, tie-only adjudication, the experimental two-pass cascade, and the unmerged Tromso companion. Source diffs and acceptance notes were inspected for the areas below.
+
+### ASR-1 — Detect silent batch failure and recover without corrupting accounting
+
+- **Turning point:** a successful process exit could still return empty Parakeet hypotheses. The fix recursively splits failing groups, tries VAD for a singleton, then balanced PCM chunks; every attempt remains in measured runtime and the original utterance mapping is preserved.
+- **Evidence:** [`44f2eaf` implementation and regression assertions](https://github.com/gracee3/native-asr/commit/44f2eafd6a6513617ead992714dab26c120b9bef), particularly `scripts/lib/batch_adapter.py` and `tests/foundation-unit`.
+- **Status:** code/test-backed. The tests distinguish recovered output, unrecoverable output, and failure despite parseable partial output.
+- **Prompt seed:** A batch process exits zero, but the evaluation reports pathological deletions. Determine whether this is recognition error, missing output, or orchestration failure. Repair recovery while retaining each input identity and all retry costs.
+- **Checkable outcome:** no false success for empty/missing payloads under the stated fixture contract; no dropped siblings; bounded recovery; complete cost accounting.
+- **Lesson:** the meaningful unit of success may be an input record, not a process.
+
+### ASR-2 — Reconcile disagreement while keeping uncertainty visible
+
+- **Turning point:** the deterministic ensemble turns insertions/deletions into real voting columns, applies 2-of-3 consensus, and explicitly preserves unresolved primary fallback. Word-level and coarse segment timing remain distinct.
+- **Evidence:** [`fe4b675` ensemble implementation and tests](https://github.com/gracee3/native-asr/commit/fe4b6752544abe91a95785fca7fbaa4a2b24aa23); [PR #3](https://github.com/gracee3/native-asr/pull/3).
+- **Status:** code/test-backed; algorithmic behavior is established by fixtures, not a universal claim that ensembles improve accuracy.
+- **Prompt seed:** Given three transcripts with conflicting insertions, deletions, punctuation, and timing granularity, produce a deterministic consensus and an audit of unresolved decisions.
+- **Checkable outcome:** exact expected columns and selected tokens for fixed fixtures; null/deletion votes count; missing word times are not fabricated.
+- **Lesson:** disagreement is useful evidence; forcing every column into a confident answer destroys it. This can be a pure code-and-data or answer-only task.
+
+### ASR-3 — Recover the product boundary when one workload invalidates another
+
+- **Turning point:** the interactive cascade was accepted on short, paced phrases after broader long-utterance stress exposed mid-sentence endpointing and worse corrections. The project separated long-form processing from interactive acceptance and recorded the rejected workload.
+- **Evidence:** [`9b7730b` implementation and T14 acceptance report](https://github.com/gracee3/native-asr/commit/9b7730bd585afe73d8855fb7a98e437f405de595). Experimental work also survives at [`388dcfa`, source-boundary attribution](https://github.com/gracee3/native-asr/commit/388dcfaba819b9fcf1bd92a087910b42d60a4a3e).
+- **Status:** demonstrated in repository-recorded T14 aggregates: two paced 100-utterance fixtures passed the stated gates; raw local audit data is not in Git. The report explicitly notes dirty-tree provenance and identifies image/fixture hashes.
+- **Prompt seed:** Review apparently contradictory latency and accuracy results from a two-stage streaming system. Explain which workloads support the interactive claim, diagnose boundary/clock errors, and define an honest acceptance contract without hiding the failed stress case.
+- **Checkable outcome:** distinguish paced latency from unpaced throughput; do not generalize phrase acceptance to arbitrary long-form input; preserve provisional-to-committed ordering and correction deadlines.
+- **Lesson:** stepping back from a narrow implementation problem can reveal two different products and two different validity domains.
+
+### ASR-4 — Bound event delivery without losing terminal lifecycle evidence
+
+- **Turning point:** the Tromso branch replaced an unbounded UI queue with a finite channel. Saturation cancels the process group and still delivers overflow plus exit. It also replaced a timing workaround for executable-busy errors with a targeted retry and a test that deliberately holds the executable open.
+- **Evidence:** [`189a794` code and supervisory repair notes](https://github.com/gracee3/native-asr/commit/189a7946d8c005cec02e080970df49bd0a022011); [unmerged PR #6](https://github.com/gracee3/native-asr/pull/6).
+- **Status:** demonstrated in recorded offline verification. The notes report 24 unit tests plus a PTY test at this step, repeated verification, and a separate missing-FFmpeg baseline limitation.
+- **Prompt seed:** A live application grows memory when its UI lags, and occasionally loses the final exit event. Define bounded behavior and implement it without silent canonical-event loss or generic retry-on-any-error.
+- **Checkable outcome:** capacity-one saturation deterministically terminates with one overflow report and an exit; unrelated spawn errors fail promptly.
+- **Lesson:** bounded memory, event integrity, and process lifecycle must be solved together.
+
+### ASR-5 — Publish an audit only when provenance and completion are valid
+
+- **Turning point:** audited sessions gained verified model provenance before staging; successful publication is atomic and no-overwrite. Graceful cancellation cleans staging, while an abrupt kill may leave private recoverable evidence without a falsely published result.
+- **Evidence:** [`f06a627` provenance and crash-path changes](https://github.com/gracee3/native-asr/commit/f06a6270372c9bb7965ff3f87f702c5acaf2a4c5); [independent closure acceptance `f2edf64`](https://github.com/gracee3/native-asr/commit/f2edf64d36f574a86d2b28f58ab5ea09fa50a528).
+- **Status:** demonstrated by recorded offline checks on an unmerged branch. Closure records 131 Rust unit tests plus one PTY test and root checks; live PipeWire/model operation was not run.
+- **Prompt seed:** Design or repair a journal publisher that must not expose partial results or misattribute a session to unverified models. Explain crash, cancellation, and restart states.
+- **Checkable outcome:** invalid provenance creates no published destination; existing output is never overwritten; incomplete staging cannot be mistaken for a committed audit.
+- **Lesson:** useful progress can be proven on a branch even when the final hardware gate and merge remain outstanding.
+
+### Negative trajectory worth keeping — narrowed LLM adjudication still did not help
+
+The [tie-only experiment `f16e8c7`](https://github.com/gracee3/native-asr/commit/f16e8c739b924d8ebab7a26a09a2e062d4016361) records two candidates run twice on calibration and disjoint held-out snapshots. Both were deterministic but did not improve the baseline and violated zero-fallback requirements. The long-form follow-on was correctly not run.
+
+The useful lesson is not another attempt to constrain the adjudicator more tightly by default. Ask whether an adjudicator is necessary, what failure costs are acceptable, and whether deterministic consensus plus explicit uncertainty already serves the product better. A scenario could ask the agent to make a go/no-go decision from the published result JSON; the correct answer may be to stop.
+
+### Additional ideas for later review
+
+- Cache identity across paired experiments: [`8b1af11`](https://github.com/gracee3/native-asr/commit/8b1af11580fc60f87965e90f407be0f625239071) is a further lead, not yet analyzed at patch level here.
+- Nonfinite confidence serialization: [`797eb65`](https://github.com/gracee3/native-asr/commit/797eb65c3216702457b551f9308125203cc2b331) could become a small contract-repair exercise.
+- The companion handoff explicitly records supervisory repair and independent acceptance. Preserve it as process evidence, while avoiding reconstruction of missing Qwen/Codex conversations.
