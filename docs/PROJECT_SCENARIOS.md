@@ -19,7 +19,7 @@ Prompt seeds and proposed acceptance checks below are new scenario ideas. They a
 
 - [x] WhisperX-batch
 - [x] native-asr
-- [ ] qwen38-int8-lab
+- [x] qwen38-int8-lab
 - [ ] gpt-oss-rs, including heterogeneous/Tiger Lake work
 - [ ] supermicro-observability
 - [ ] digital-liquid-light-lab
@@ -152,3 +152,60 @@ The useful lesson is not another attempt to constrain the adjudicator more tight
 - Cache identity across paired experiments: [`8b1af11`](https://github.com/gracee3/native-asr/commit/8b1af11580fc60f87965e90f407be0f625239071) is a further lead, not yet analyzed at patch level here.
 - Nonfinite confidence serialization: [`797eb65`](https://github.com/gracee3/native-asr/commit/797eb65c3216702457b551f9308125203cc2b331) could become a small contract-repair exercise.
 - The companion handoff explicitly records supervisory repair and independent acceptance. Preserve it as process evidence, while avoiding reconstruction of missing Qwen/Codex conversations.
+
+## qwen38-int8-lab
+
+Reviewed main at `4494971`, the returned complete 61-commit history, all eight listed branches, all 16 PR records, and targeted implementation diffs plus architecture, candidate, evaluation, and recovery reports. The current recovery report is newer than the PR #14 description and adds RTX 3090 evidence; the narrower older description must not overwrite that result.
+
+### QINT-1 — Separate the transformation target from the graph execution boundary
+
+- **Turning point:** treating every Linear as a sequential subgraph triggered `KeyError: forward`. Keeping Linear modules as quantization targets while using decoder layers as tracing/onloading boundaries resolved the failure. Architecture inspection also exposed 1-centered RMSNorm, GDN layers, and MTP tensors omitted by the instantiated model class.
+- **Evidence:** [implementation `5bfa399`](https://github.com/gracee3/qwen38-int8-lab/commit/5bfa399f561fcd935e8af883df1c58d8afe97610); [architecture policy](https://github.com/gracee3/qwen38-int8-lab/blob/44949714ff6dde6db866532f8600129af689361e/reports/architecture-policy.md); [attempt ledger](https://github.com/gracee3/qwen38-int8-lab/blob/44949714ff6dde6db866532f8600129af689361e/reports/evaluation-and-agent-status-2026-08-29.md).
+- **Status:** demonstrated by the recorded synthetic smoke and real load/trace gate: 64 decoder targets, 65 sequential subgraphs, and 256 intended quantized modules.
+- **Prompt seed:** Given a module inventory, tracing failure, and transformation API, identify the correct unit for transformation versus scheduling. Produce a coverage policy and explain which architecture-sensitive paths need separate evidence.
+- **Checkable outcome:** correct target counts and exclusions; no unsupported assumption that every Linear or normalization layer behaves alike.
+- **Lesson:** changing the abstraction boundary can solve a failure that repeated parameter tuning cannot.
+
+### QINT-2 — Make an apparently complete artifact independently loadable
+
+- **Turning point:** the quantized shard/index checkpoint still needed a read-only view supplying two missing processor files. The serializer was fixed to copy and hash them inside staging before atomic publication, alongside preserved MTP tensors.
+- **Evidence:** [`8589f78` serializer/preflight changes](https://github.com/gracee3/qwen38-int8-lab/commit/8589f786020a338e67ac5144e03d4c70582bfa30); [successful tiny/small/quality report](https://github.com/gracee3/qwen38-int8-lab/blob/44949714ff6dde6db866532f8600129af689361e/reports/quality-candidate-2026-08-25.md); [PR #8 negative test](https://github.com/gracee3/qwen38-int8-lab/pull/8).
+- **Status:** demonstrated in recorded direct-loading gates on the final self-contained artifact. Functional loading does not establish standardized model accuracy.
+- **Prompt seed:** A model loads only when its source directory is also available. Audit the output manifest and repair publication so the deliverable is complete on its own.
+- **Checkable outcome:** required metadata, processor files, shard references, and preserved tensors are present and checked before publication; invalid/missing files prevent promotion.
+- **Lesson:** serialization success is not deliverable completeness. The same task applies to installers, offline appliances, and signed release bundles.
+
+### QINT-3 — Diagnose an evaluation workload that exceeds a working chat runtime
+
+- **Turning point:** prompt-render auditing caught a 12,314-token request before inference. Later log-likelihood runs still OOMed; explicit KV allocation, text-only activation, and bounded chunked prefill allowed the maximum-request runtime gate to pass without altering the immutable checkpoint.
+- **Evidence:** [`b15f181` runtime gate and configuration diff](https://github.com/gracee3/qwen38-int8-lab/commit/b15f1812e01b65c9ec3e7943aae7bb853ce494c8); [request/runtime attempt ledger](https://github.com/gracee3/qwen38-int8-lab/blob/44949714ff6dde6db866532f8600129af689361e/reports/evaluation-and-agent-status-2026-08-29.md); [PR #10](https://github.com/gracee3/qwen38-int8-lab/pull/10).
+- **Status:** demonstrated engineering gate: 154,531 rendered requests with zero truncation and a complete maximum-request log-probability check. The standardized suite was paused; it does not provide a completed accuracy score.
+- **Prompt seed:** A server passes chat smoke tests but fails evaluation. Use request lengths, allocation logs, and runtime settings to design a representative preflight and repair resource allocation without shortening the benchmark silently.
+- **Checkable outcome:** maximum workload remains intact; log-probabilities are complete; partial evaluation is not promoted into a final score; candidate-only evidence cannot claim BF16 retention.
+- **Lesson:** smoke tests must exercise the operation that actually exhausts resources.
+
+### QINT-4 — Identify the supervisor as the source of a misleading failure
+
+- **Turning point:** repeated late-stage `KeyboardInterrupt` failures were caused by the swap watchdog, not an unexplained operator interrupt. The patch records effective limits, prints the reason immediately, and raises `ResourceSafetyError`. A host wrapper coordinates temporary settings and restoration.
+- **Evidence:** [`18554c4` fix and tests](https://github.com/gracee3/qwen38-int8-lab/commit/18554c453e61aa1a9b18557db19b1ae3e709d634); [PR #13](https://github.com/gracee3/qwen38-int8-lab/pull/13).
+- **Status:** code/test-backed with reported tests for sustained triggering and restoration on normal failure/handled signals. The revised 32 GiB ceiling was an operational choice, not a proven full-run requirement.
+- **Prompt seed:** An expensive job repeatedly stops near completion with a misleading exception. Correlate worker and supervisor evidence, identify the actual termination cause, and make it diagnosable without disabling protection.
+- **Checkable outcome:** distinguish operator cancellation, resource abort, and worker fault; retain RAM constraints; restore temporary settings where the signal model permits.
+- **Lesson:** expand the investigation beyond the failing function to the system that controls it.
+
+### QINT-5 — Resume expensive stateful computation with exact equivalence
+
+- **Turning point:** rolling snapshots preserve model/qparameter state, cached calibration batches, RNG state, and identity. Publication replaces the current pointer before deleting the prior generation; checksums and writer locking reject unsafe resumes.
+- **Evidence:** [`5094844` implementation and manifest tests](https://github.com/gracee3/qwen38-int8-lab/commit/5094844644c4786daef8e23735739ebfb250f350); [RTX 3090 verification `5970f39`](https://github.com/gracee3/qwen38-int8-lab/commit/5970f391deddf04dffdab110a8065743d90170a6); [recovery report](https://github.com/gracee3/qwen38-int8-lab/blob/44949714ff6dde6db866532f8600129af689361e/reports/resumable-quant-2026-09-06.md).
+- **Status:** demonstrated for small Qwen synthetic models, including BF16/CPU offload and actual RTX 3090 interruption/resume. W8A8 matched all 109 tensors; W4A16 matched 127. Full 27B I/O and power-loss recovery remain unvalidated.
+- **Prompt seed:** Determine the minimum complete recovery state for a staged numerical pipeline. Repair interrupted-stage and final-export recovery while rejecting a changed recipe, corrupted snapshot, or second writer.
+- **Checkable outcome:** fresh-process resumption matches uninterrupted output exactly on the supplied small computation; incomplete publication preserves the previous valid generation.
+- **Lesson:** a recoverable job needs more than saved weights or a stage number.
+
+### Additional ideas and unsuccessful paths
+
+- Long-context comparison is another evidence-analysis task: [PR #12](https://github.com/gracee3/qwen38-int8-lab/pull/12) reports TP2 faster and with more balanced memory than PP2, plus a 150K retrieval result. That is a measured narrow result, not proof of all long-context quality.
+- [Unmerged single-GPU fix, PR #16](https://github.com/gracee3/qwen38-int8-lab/pull/16) distinguishes a sequential quantizer's one-GPU requirement from the serving topology's TP2 requirement. Useful prompt: find an inherited preflight assumption that blocks a valid configuration.
+- The preserved serialization interruption is valuable evidence of a correctly enforced guard and an unfinished artifact; do not relabel it as a corrupt completed checkpoint.
+- Dataset-parser corrections for JSON-string messages and differing source schemas are leads for a later calibration-data integrity scenario.
+- Keep the broader decision visible: whether another full quant or another large evaluation is justified by the evidence and available resources.
