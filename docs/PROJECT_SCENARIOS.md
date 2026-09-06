@@ -20,7 +20,7 @@ Prompt seeds and proposed acceptance checks below are new scenario ideas. They a
 - [x] WhisperX-batch
 - [x] native-asr
 - [x] qwen38-int8-lab
-- [ ] gpt-oss-rs, including heterogeneous/Tiger Lake work
+- [x] gpt-oss-rs, including heterogeneous/Tiger Lake work
 - [ ] supermicro-observability
 - [ ] digital-liquid-light-lab
 - [ ] Mirabile
@@ -209,3 +209,66 @@ Reviewed main at `4494971`, the returned complete 61-commit history, all eight l
 - The preserved serialization interruption is valuable evidence of a correctly enforced guard and an unfinished artifact; do not relabel it as a corrupt completed checkpoint.
 - Dataset-parser corrections for JSON-string messages and differing source schemas are leads for a later calibration-data integrity scenario.
 - Keep the broader decision visible: whether another full quant or another large evaluation is justified by the evidence and available resources.
+
+## gpt-oss-rs — CPU, Tiger Lake, and archived heterogeneous research
+
+Reviewed main at `8b3ff46`, the latest 200 reachable commits, all 151 listed branch names/heads across two pages, all 13 PR records, targeted historical code diffs, Tiger Lake closure, final research report, and the HET retrospective/gate. This is a systematic selection of turning points, not a claim that every commit on every historical branch was read. Earlier probe/replay and multi-GPU branches were checked as distinct archived leads.
+
+### GPT-1 — Repair blocking initialization at an asynchronous runtime boundary
+
+- **Turning point:** Harmony encoding initialization created a blocking HTTP client whose helper-runtime lifecycle could panic inside Tokio. Initialization moved before async serving, with a process-lifetime OnceLock and a dedicated-thread lazy path for library callers.
+- **Evidence:** [`b9eea9c` server/tokenizer diff](https://github.com/gracee3/gpt-oss-rs/commit/b9eea9c6ef70ecbb159bf053d18b183a70d525c6), especially `crates/gpt-oss-tokenizer/src/protocol.rs` and server `main.rs`; [PR #1](https://github.com/gracee3/gpt-oss-rs/pull/1).
+- **Status:** code/test-backed with recorded closure of eight Harmony/Tokio failures and the restored non-GPT replay path.
+- **Prompt seed:** A library initializes correctly in a standalone command but panics when called from an async service. Trace initialization and destruction across dependency/runtime boundaries, then make startup and lazy use safe.
+- **Checkable outcome:** one shared initialization, no nested-runtime-drop panic, clear initialization errors, and preserved protocol behavior.
+- **Lesson:** the failing stack frame may be a dependency's cleanup, not the service's main operation.
+
+### GPT-2 — Preserve numerical semantics while changing packed layouts and SIMD kernels
+
+- **Turning point:** compact MXFP4 execution gained explicit layouts and scalar/AVX2/AVX-512 paths. An E8M0 correction fixed special scale encodings that a simple exponent-bit shift mishandled.
+- **Evidence:** [special-value fix `849785e`](https://github.com/gracee3/gpt-oss-rs/commit/849785e04c6df993cd3740688d787d330da78b14); [AVX-512 x8 diff `eb92640`](https://github.com/gracee3/gpt-oss-rs/commit/eb92640a82177be2e7ccc75617f5c6a686942c1b); [final exactness evidence](https://github.com/gracee3/gpt-oss-rs/blob/8b3ff46e25c213104219db8e9d390bc05dacf8bf/docs/research/FINAL_REPORT.md).
+- **Status:** demonstrated within published shape/kernel checks; full-model greedy-token equality is a separate, weaker claim than identical logits.
+- **Prompt seed:** Given a compact numeric format, scalar reference, optimized implementation, and edge-case mismatch, identify the semantic error and retain the numerical contract across layouts and supported instruction paths.
+- **Checkable outcome:** correct zero/special scale semantics; exact reference agreement on prescribed cases; reject forced unavailable ISA; distinguish kernel correctness from model quality.
+- **Lesson:** ordinary values can conceal a format error. A small deterministic numerical question may capture the turning point without a model runtime.
+
+### GPT-3 — Make model and sequence updates transactional
+
+- **Turning point:** immutable model resources, mutable sequence state, and execution scratch became separate owners. A prepared step stages K/V rows and tokens, then validates revisions and all target sequences before commit.
+- **Evidence:** [`94a01a6` transactional CPU model diff](https://github.com/gracee3/gpt-oss-rs/commit/94a01a6097d830dcbd081983851016395b4ab457); [sampling/lifecycle follow-on `2247df9`](https://github.com/gracee3/gpt-oss-rs/commit/2247df9f35090cffb29762479871c454a79821d3); [research report](https://github.com/gracee3/gpt-oss-rs/blob/8b3ff46e25c213104219db8e9d390bc05dacf8bf/docs/research/FINAL_REPORT.md).
+- **Status:** code/test-backed for the inspected model-state change; publication records bounded lifecycle/scheduling verification. No general multi-user production-readiness claim.
+- **Prompt seed:** A cancelled or failed computation leaves cached state partially advanced. Define prepare/execute/commit semantics so a retry sees the same committed state, including stale revisions and duplicate sequence references.
+- **Checkable outcome:** dropped/failed prepared work leaves state unchanged; all preconditions are checked before mutation; committed positions and cache contents agree.
+- **Lesson:** atomicity applies to in-memory numerical state, not only databases.
+
+### GPT-4 — Coordinate heterogeneous work with proven completion before reuse
+
+- **Turning point:** H7 ran a real 20B continuation under static CPU/GPU0/GPU1 expert ownership, with bounded relay storage, deterministic route-rank reduction, and visibility-last commit. A recoverable post-enqueue fault drained siblings and retried; unproven drain quarantined resources and rejected reuse.
+- **Evidence:** [`a9ab97a` implementation](https://github.com/gracee3/gpt-oss-rs/commit/a9ab97aef349e7f05b79dd6a1aa6eed1853dd7b4); [immutable H7 gate and linked JSON records](https://github.com/gracee3/gpt-oss-rs/blob/a9ab97aef349e7f05b79dd6a1aa6eed1853dd7b4/docs/het/evidence/implementation-2026-08/h7/README.md).
+- **Status:** demonstrated historical success, retained in the archive although the published CPU tree excludes the HET runtime. Exact eight-token continuation passed twice; no controlled HET speedup was established.
+- **Prompt seed:** Several devices contribute to one result and a remote operation fails after a sibling has started. Decide what can be committed, retried, released, or quarantined from supplied completion evidence.
+- **Checkable outcome:** no partial visible state; no early buffer reuse; canonical reduction order; safe retry only after a proven drain; uncertain completion cannot become success.
+- **Lesson:** the broad reusable problem is distributed ownership and transactional publication, not just GPU kernel plumbing.
+
+### GPT-5 — Turn local optimization into a defensible dispatch decision
+
+- **Turning point:** Tiger Lake's candidate matrix region won in isolation but regressed full requests, so automatic promotion was rejected. Xe residency also delivered a large repeated-projection improvement yet zero cache hits on measured full-model prefill; explicit integration remained valid while automatic acceleration stayed disabled.
+- **Evidence:** [Tiger Lake closure](https://github.com/gracee3/gpt-oss-rs/blob/8b3ff46e25c213104219db8e9d390bc05dacf8bf/docs/TIGER_LAKE_CLOSURE.md); [PR #5](https://github.com/gracee3/gpt-oss-rs/pull/5); [explicit Xe integration `6caf274`](https://github.com/gracee3/gpt-oss-rs/commit/6caf27423744148dafb1fb2670a03f29452311f3).
+- **Status:** demonstrated correctness/integration and demonstrated negative promotion result. Closure records 42/42 official generated-token comparisons and 22 live OpenCL tests. These do not erase the negative full-request performance result.
+- **Prompt seed:** Given operator benchmarks, workload traces, cache hit/miss records, thermals, and full-request pairs, decide whether to promote an optimization. Explain why an impressive local result can fail at application level.
+- **Checkable outcome:** reject unsupported automatic regions; account for actual reuse and conversion/upload costs; distinguish decode gains from prompt/full-request latency.
+- **Lesson:** the right scenario answer can be “keep the implementation available, but do not choose it automatically.” The later Xeon publication has its own hardware/workload-specific decisions and must not be mixed with Tiger Lake evidence.
+
+### Rabbit hole to preserve — the capacity constraint changed the question
+
+The [HET retrospective](https://github.com/gracee3/gpt-oss-rs/blob/8b3ff46e25c213104219db8e9d390bc05dacf8bf/docs/research/HETEROGENEOUS_RETROSPECTIVE.md) separates proven H7 20B execution from incomplete H8 120B construction and the later R4 comparison. R4 eventually rejected a 13,761,300,984-byte native shard because its frozen mapping window was 10,544,040,680 bytes. Improving release ordering did not make that shard fit.
+
+A useful evidence-only scenario asks the agent to step back: is this still a lifetime bug, an admission-policy mismatch, or a need for a different ingestion strategy? The answer must preserve the successful ownership work while recognizing that the current experiment cannot establish the larger objective. Do not quietly relax a resource contract merely to obtain a passing run.
+
+### Additional ideas for later review
+
+- The archived [YaRN RoPE change `bd49d35`](https://github.com/gracee3/gpt-oss-rs/commit/bd49d35432f9d532337dbcb39ed4c6a1f4f4776a) wires scaling parameters through configuration and runner/probe paths. Its code is a promising lead; this review does not claim it closed every historical parity divergence.
+- [Scoped shard transactions, PR #11](https://github.com/gracee3/gpt-oss-rs/pull/11) provide a smaller source/synthetic ownership exercise with nine transaction tests.
+- The 151 branch names reveal extensive numerical localization and source-attribution work. A future prompt could ask which new observation would discriminate competing causes, instead of requesting another narrowly scoped patch.
+- Fresh oracle and converted-GGUF identity are further reproducibility scenarios: identical model names are not identical evidence artifacts.
+- Retain successful H7 work even though it was excluded from the release tree; archival disposition is not failure.
