@@ -10,11 +10,15 @@ The current scope is an educational study of Codex CLI's observable execution li
 
 ## Milestone 1 — map the Codex CLI lifecycle
 
+Status: source/documentation research delivered on 2026-09-06 in [Research Report](RESEARCH_REPORT.md). Runtime observation remains unperformed; the report records the pinned source revision and access limitations.
+
 Research session/turn entry, tool execution, completion, interruption, and resumption where supported. Pin the examined version and cite evidence.
 
 Done when: `docs/RESEARCH_REPORT.md` explains verified boundaries and explicitly marks unknowns.
 
 ## Milestone 2 — identify observable events
+
+Status: source-backed inventory and minimal capture recommendation delivered in [Research Report](RESEARCH_REPORT.md). Live traces, interruption behavior, and target-release compatibility still require runtime validation.
 
 Inventory user-accessible surfaces and native events. Trace tool calls and results, identifiers, ordering, output transformations, and visibility limits.
 

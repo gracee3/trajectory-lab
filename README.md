@@ -8,6 +8,7 @@ The goal is to learn where a session begins, how tool calls and results move thr
 
 - [Vision](docs/VISION.md): why this lab exists and its boundaries.
 - [Research Plan](docs/RESEARCH_PLAN.md): questions and the research-only handoff for the next Codex agent.
+- [Research Report](docs/RESEARCH_REPORT.md): source-backed lifecycle map, event inventory, capture recommendation, and runtime-validation gaps.
 - [Roadmap](docs/ROADMAP.md): milestones and completion criteria.
 
 ## Non-goals
@@ -26,7 +27,7 @@ The goal is to learn where a session begins, how tool calls and results move thr
 4. **Export JSONL logs.** Capture one record per line with provenance and explicit handling of incomplete or unavailable data.
 5. **Replay a session.** Display a recorded session in order, including visible tool activity and results. Replay means inspecting the log, not rerunning commands.
 
-These are planned milestones, not claims about features already implemented or events already verified.
+Milestones 1–2 are documented in the research report at a pinned upstream commit. Runtime observation remains unperformed because a local Codex CLI executable was unavailable. Milestones 3–5 remain planned; no capture or replay features are implemented.
 
 ## Current status and layout
 
@@ -40,4 +41,4 @@ The repository contains documentation and preliminary schemas from an earlier, b
 | `tasks/` | Notes for future small observation scenarios |
 | `evaluators/` | Notes on capture and replay fidelity |
 
-The current direction supersedes the original multi-model training-data pipeline. Existing schemas are retained for reference and must not determine the new event design. The next deliverable is a research report, not code.
+The current direction supersedes the original multi-model training-data pipeline. Existing schemas are retained for reference and must not determine the new event design. The research report recommends a bounded `codex exec --json` capture adapter, with explicit limits on IDs, timing, output, cancellation, and usage. Review that recommendation and validate the target CLI version before beginning the schema and implementation milestones.

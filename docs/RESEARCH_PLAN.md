@@ -1,5 +1,7 @@
 # Research Plan: Codex CLI observable lifecycle
 
+Status (2026-09-06): the [Research Report](RESEARCH_REPORT.md) delivers the source/documentation investigation, with a pinned upstream commit and explicit runtime-access limitations. No implementation or machine-readable schema changes were made. The research-only handoff below remains the scope and acceptance reference.
+
 ## Handoff objective
 
 Research the observable execution lifecycle of Codex CLI and produce an evidence-backed report. **This handoff requests research and documentation, not implementation code.**
