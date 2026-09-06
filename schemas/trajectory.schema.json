@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/gracee3/trajectory-lab/schemas/trajectory.schema.json",
+  "title": "Trajectory",
+  "type": "object",
+  "required": ["trajectory_id", "task_id", "split", "source", "model", "agent", "execution", "events", "artifacts", "metrics", "scores", "verdict"],
+  "properties": {
+    "trajectory_id": {"type": "string"},
+    "task_id": {"type": "string"},
+    "split": {"enum": ["train", "dev", "held-out"]},
+    "source": {
+      "type": "object",
+      "required": ["repository", "base_commit"],
+      "properties": {
+        "dataset": {"type": ["string", "null"]},
+        "repository": {"type": "string"},
+        "base_commit": {"type": "string"}
+      },
+      "additionalProperties": true
+    },
+    "model": {
+      "type": "object",
+      "required": ["provider", "model_id"],
+      "properties": {
+        "provider": {"type": "string"},
+        "model_id": {"type": "string"},
+        "checkpoint": {"type": ["string", "null"]},
+        "quantization": {"type": ["string", "null"]}
+      },
+      "additionalProperties": true
+    },
+    "agent": {"type": "object"},
+    "inference": {"type": "object"},
+    "execution": {
+      "type": "object",
+      "required": ["started_at"],
+      "properties": {
+        "started_at": {"type": "string", "format": "date-time"},
+        "finished_at": {"type": ["string", "null"], "format": "date-time"},
+        "wall_seconds": {"type": ["number", "null"]},
+        "environment_digest": {"type": ["string", "null"]}
+      },
+      "additionalProperties": true
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["kind"],
+        "properties": {
+          "kind": {"type": "string"},
+          "timestamp": {"type": ["string", "null"], "format": "date-time"},
+          "data": {}
+        },
+        "additionalProperties": true
+      }
+    },
+    "artifacts": {"type": "object"},
+    "metrics": {"type": "object"},
+    "scores": {"type": "object"},
+    "verdict": {
+      "type": "object",
+      "properties": {
+        "accepted": {"type": ["boolean", "null"]},
+        "policy_version": {"type": ["string", "null"]},
+        "reasons": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}
