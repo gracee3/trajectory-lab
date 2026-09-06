@@ -24,7 +24,7 @@ Prompt seeds and proposed acceptance checks below are new scenario ideas. They a
 - [x] supermicro-observability
 - [x] digital-liquid-light-lab
 - [x] Mirabile
-- [ ] Magnolia
+- [x] Magnolia
 
 ## How to develop a selected idea later
 
@@ -444,3 +444,61 @@ Reviewed main at `a407a82`, the complete returned main history, all 11 listed br
 - `c1ac17c` adds time-conversion fingerprinting. Inspect the full cache-key transition before isolating a stale-cache scenario.
 - Known-answer checks reach owned live browser output, using independent JPL/Swiss references with circular angle comparisons. This suggests a general evaluator task: an isolated provider test cannot establish that the displayed result came from the intended computation.
 - Raw logs and screenshots cited by the PRs remain under ignored local output paths. Public commits and verification records support the historical claims, but extracting a complete visual replay will require those artifacts or a fresh run later.
+
+## Magnolia
+
+Reviewed main at `b42316f`, all 191 main-history commits returned across two pages, all 11 listed branch tips and all nine current PR records. Also inspected the separate native-ASR and old `worktree-1` histories, the rearchitecture audit, and focused implementation/repair diffs. Older history includes several names and architectures; deleted code remains useful evidence.
+
+### MAG-1 — Recover a reproducible headless baseline from accidental workspace coupling
+
+- **Turning point:** a clean checkout could not load without a sibling TensorRT repository, while the nominal core pulled rendering/GPU dependencies. Explicit workspace membership and opt-in visual resources restored a CUDA-free baseline.
+- **Evidence:** [baseline repair `92c4280`](https://github.com/gracee3/magnolia/commit/92c4280035f930297d5e232160d83bab5cc81c98); [feature-boundary fix `facb371`](https://github.com/gracee3/magnolia/commit/facb371ca9b250522ec4444201f3f967e4244285); [PR #1](https://github.com/gracee3/magnolia/pull/1) records metadata, headless checks, tests, Clippy and workspace checks.
+- **Status:** demonstrated for that historical baseline, despite later replacement of the architecture.
+- **Prompt seed:** give a workspace manifest, feature graph and clean-checkout metadata failure. Ask why selecting a headless package still requires an unrelated checkout and how to establish the intended dependency boundary.
+- **Checkable outcome:** metadata resolves without sibling repositories; explicit member/default-member sets match the intended build; headless core excludes wgpu, Nannou and the UI crate; opting into rendering restores its required dependencies.
+- **Broader lesson:** a useful repair may simplify the build graph instead of fixing each dependency error individually. Deletion of the old implementation does not erase the solved lesson.
+
+### MAG-2 — Make overload and reclamation safe on the real-time callback path
+
+- **Turning point:** native audio hardening replaced callback-reachable publication/recycling panics with bounded fault outcomes and held-block recovery. A second graph activation waits when the retired graph cannot yet be reclaimed off the callback thread. Later work adapts negotiated formats and quanta into preallocated blocks.
+- **Evidence:** [callback-boundary repair `f90e768`](https://github.com/gracee3/magnolia/commit/f90e7681c6ee7890eb7e03482253dc645e6002b4); [negotiated-audio adaptation `8de98c9`](https://github.com/gracee3/magnolia/commit/8de98c92c3ca23dd87b34d21d506cfc43d39f075); [Phase 4 live acceptance, PR #8](https://github.com/gracee3/magnolia/pull/8).
+- **Status:** foundation regressions are code/test-backed; the later recorded 1,800-second live tier demonstrates 84,463 callbacks with zero observed callback allocations/deallocations, faults or drops in the tested 48 kHz stereo configuration. It is not universal device certification.
+- **Prompt seed:** supply a two-queue block-pool trace, a full retirement queue, two pending graph changes and a non-default input quantum. Ask which actions are legal in the callback and how loss/recovery should be represented.
+- **Checkable outcome:** defer activation rather than destroy the old graph on the callback; preserve ownership when a queue operation fails; count and report discontinuities; maintain conversion state across buffer boundaries; allocate and reclaim outside the callback.
+- **Broader lesson:** bounded storage alone does not make a real-time path safe. Ownership and exceptional paths matter as much as the normal path.
+
+### MAG-3 — Keep authoritative control and final events intact under lossy telemetry overload
+
+- **Turning point:** the replacement shell separates control/projection traffic from binary telemetry and gives each stream a delivery policy. Meter/partial updates can replace older values; waveform/spectrum/diagnostics use bounded dropping; final transcript entries remain ordered application-owned records.
+- **Evidence:** [Phase 2 transport and overload record, PR #5](https://github.com/gracee3/magnolia/pull/5); [browser lifecycle/overload tests `a9bcc5f`](https://github.com/gracee3/magnolia/commit/a9bcc5ff41f43cd0e94e79e842c4c26c39d3a825); [earlier audit](https://github.com/gracee3/magnolia/blob/b42316fa3b1f5fd30a387cd98a982ca61bc5ec74/docs/rearchitecture/audit-2026-08-28.md).
+- **Status:** demonstrated structurally with synthetic telemetry, real transport and browser journeys. A 2,000-frame burst still permits a control receipt/projection; twenty reloads retain runtime identity and transcript cursor. Those are not native-ASR or latency-benchmark results.
+- **Prompt seed:** present mixed partials, finals, waveform frames and control receipts entering overloaded queues. Ask which may be replaced, which must persist and what a reconnecting client needs to recover.
+- **Checkable outcome:** bound telemetry memory; carry sequence/loss/discontinuity metadata; preserve final ordering and cursor access; isolate control progress; release hidden leases without recreating the native runtime on browser reload.
+- **Broader lesson:** “drop old data” is a semantic decision. The old audit found that the STT source label did not match its partial-event overflow classifier; retaining only the newest event was not proof that finals survived.
+
+### MAG-4 — Reject a stale lease completion without releasing the currently desired resource
+
+- **Turning point:** a long audio soak passed, but the subsequent browser transitions exposed a lease race. An unrelated reactive rerun invalidated an in-flight subscription; its stale completion could release the analyzer that the current view still wanted.
+- **Evidence:** [focused repair `501da3e`](https://github.com/gracee3/magnolia/commit/501da3e887fd2cc3f18eb45902b197998ec5bcea); [Phase 5 rejected-run and repair record](https://github.com/gracee3/magnolia/blob/b42316fa3b1f5fd30a387cd98a982ca61bc5ec74/docs/rearchitecture/phase-5-observation.md); [final acceptance PR #9](https://github.com/gracee3/magnolia/pull/9).
+- **Status:** demonstrated failure-to-fix sequence. The rejected candidate had good core soak counters; the repaired final `20de8cf` passed both complete gates, including ten rapid workspace transitions and close/reopen.
+- **Prompt seed:** give subscription generations, visibility changes and out-of-order success/error completions. Ask which completion may update status, which may release the resource and which must do nothing.
+- **Checkable outcome:** advance generations at actual lease/visibility boundaries; stale errors cannot clear a current observer; stale success cannot release a still-desired lease; hidden/destroyed views eventually release resources.
+- **Broader lesson:** a successful long soak can miss a short lifecycle race. Preserve the good subsystem evidence and the failed overall gate, then design the missing transition test.
+
+### MAG-5 — Publish a recoverable recording and replay more than the raw samples
+
+- **Turning point:** Phase 5 introduced an explicit bounded storage worker, incomplete staging directories, versioned bundles and replay clocks. The recording includes PCM, timeline, semantic controls, analyzer and telemetry evidence rather than only an audio file.
+- **Evidence:** [recording/replay implementation `2b2dc92`](https://github.com/gracee3/magnolia/commit/2b2dc92a91c335b809db08ca970a0b4728cf118a); [recording source and tests](https://github.com/gracee3/magnolia/blob/b42316fa3b1f5fd30a387cd98a982ca61bc5ec74/crates/magnolia-observe/src/recording.rs); [PR #9](https://github.com/gracee3/magnolia/pull/9).
+- **Status:** demonstrated by the reported seeded recording/replay, atomic-finalization, incomplete-recovery and corruption-rejection gates. Physical microphone samples were analyzed in memory; the recording evidence used generated seeded PCM.
+- **Prompt seed:** supply a partially written bundle, manifest, chunk sizes and event timeline. Ask whether it may be recovered, which checks precede publication and what must stay invariant under real-time versus accelerated or deterministic replay.
+- **Checkable outcome:** validate JSON, PCM frame boundaries and hashes; flush/sync before atomic publication and sync the parent directory; reject corrupted or still-incomplete bundles; preserve event ordering and compare PCM/timeline/control/analyzer/telemetry identities independently of playback speed.
+- **Broader lesson:** replay is an evidence contract. Matching raw input bytes alone does not establish that the same controls, timeline or observations were reproduced.
+
+### Additional ideas, older rabbit holes and partial success
+
+- The old Parakeet history contains timeout, CUDA synchronization, slot-reuse and stop-statistics investigations, and `worktree-1` adds caption throttling. These commits establish attempted interventions, not successful TensorRT execution. Recover retained run artifacts or the owner's explanation before labeling an exact old GPU fault solved.
+- The rearchitecture audit identified overlapping module APIs and claims that old lifecycle tests did not prove. A broad architecture-diagnosis scenario could ask which contracts are genuinely established and which require a new boundary; it need not ask for another plugin framework.
+- The unmerged native-ASR branch at [`7da122c`](https://github.com/gracee3/magnolia/commit/7da122c2ac9c56557112862f96b2193742f09862) corrects an initial two-artifact provenance blocker: the native-library digest became established, but the model digest remained missing under that project's stated gate. Its [model-free foundation](https://github.com/gracee3/magnolia/commit/95f44b2db0de3b513fbcba16b065112381d189e1) implements partial revisions, immutable finals, gap/reset reduction, cancellation and durable final journaling. Those are extractable code/test leads; live model execution and WER/RTF acceptance were not achieved.
+- That provenance stop is a useful evidence-review prompt: distinguish a reproducibility checksum from the specific trusted-origin evidence required by a supplied project contract. Do not silently redefine the contract to make the gate pass.
+- Exact-device versus follow-default selection, source disappearance/recovery and cumulative counters have live evidence in PR #8. This could become a separate device-state scenario later.
+- The Phase 5 document records the repaired implementation run; PR #9 records the subsequent final documentation-inclusive commit run. Keep their slightly different callback counts and timings attached to their own revisions rather than merging them into one experiment.
