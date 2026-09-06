@@ -23,7 +23,7 @@ Prompt seeds and proposed acceptance checks below are new scenario ideas. They a
 - [x] gpt-oss-rs, including heterogeneous/Tiger Lake work
 - [x] supermicro-observability
 - [x] digital-liquid-light-lab
-- [ ] Mirabile
+- [x] Mirabile
 - [ ] Magnolia
 
 ## How to develop a selected idea later
@@ -386,3 +386,61 @@ Reviewed all four listed branches, both unmerged PRs, the four-commit bootstrap 
 - [Interactive PR #2](https://github.com/gracee3/digital-liquid-light-lab/pull/2) implements a kinematic plate preview but explicitly leaves RTX presentation, TrackPoint behavior and transport acceptance unverified. Keep “implemented preview” separate from “hardware path accepted.”
 - That PR mentions later Candidate H/Review Q history not present in the listed research branch inspected here. Locate the actual later commits or evidence bundle before adding WP5 outcomes. The accessible branch establishes acceptance through WP4 only.
 - A useful prompt-only lesson is to classify claims: presenting frames, passing CPU invariants, matching physical behavior and winning a benchmark are different achievements.
+
+## Mirabile
+
+Reviewed main at `a407a82`, the complete returned main history, all 11 listed branch tips, all four PR records, and the additional commit histories for the cockpit, professional wheel and unmerged live-workflow branches. Earlier `astra-*` paths are the same project's pre-rename history.
+
+### MIR-1 — Deliver one asynchronous result to multiple observers without consuming it twice
+
+- **Turning point:** concurrent application observers could both enter a single-consumer Worker inbox. The runtime correction serializes receives and rechecks the application version, pending work and in-flight requests after acquiring the gate.
+- **Evidence:** [runtime correctness diff `fdf2612`](https://github.com/gracee3/mirabile/commit/fdf2612a4a3c80e90d79d7afcf4af0c1c762db10). Its regression starts two projection waiters, confirms one receive call, injects one result and checks that both observe the same newer version. Existing stale-success and stale-failure tests are retained.
+- **Status:** code/test-backed at the original fix; later [PR #4](https://github.com/gracee3/mirabile/pull/4) reports native stale-result and atomic one-slot failure regressions plus real Worker browser validation.
+- **Prompt seed:** give an event trace with two subscribers, overlapping calculation requests and out-of-order completions. Ask why a waiter hangs or an old result replaces a newer view, then specify the correct state transitions.
+- **Checkable outcome:** one receiver drives a given inbox; queued observers recheck state before receiving again; stale successes and failures cannot replace current results; an incomplete two-slot calculation does not publish half a new wheel.
+- **Broader lesson:** result transport, observer notification and publication authority are separate responsibilities. This is useful as an event-trace diagnosis task.
+
+### MIR-2 — Save a composite edit atomically while preserving the user's conflicted draft
+
+- **Turning point:** saved chart editing spans a factual record and a calculation definition. The repository gained atomic save batches with compare-only dependencies, conflict collection and application-owned draft recovery.
+- **Evidence:** [atomic editing `1f6106d`](https://github.com/gracee3/mirabile/commit/1f6106d74d9e87db89d421341ff09a078bac65e1), including memory/IndexedDB implementations and regressions for two-component conflicts, compare-only failure, cancellation and shared records; [cockpit PR #2](https://github.com/gracee3/mirabile/pull/2).
+- **Status:** demonstrated in the recorded native and browser conflict/reload gates. This review has not rerun IndexedDB.
+- **Prompt seed:** provide two open editors sharing a factual record, current revisions and competing writes. Ask which transaction may commit, which revisions should change and what remains visible after a conflict.
+- **Checkable outcome:** compare all dependencies before publishing; commit both changed components or neither; a definition-only edit checks but does not gratuitously revise its factual record; retain local edits and a usable Cancel path; require explicit copy/detach semantics before changing shared facts.
+- **Broader lesson:** “save failed” is not a complete interaction contract. Correctness includes preserving user work and the meaning of shared data.
+
+### MIR-3 — Replay structured actions after transient editor identities have changed
+
+- **Turning point:** nested macros stopped depending on runtime draft-item IDs. Version-1 structural selectors resolve resources, list items and query paths against the current read model and report topology mismatches.
+- **Evidence:** [structural replay `e6b8182`](https://github.com/gracee3/mirabile/commit/e6b8182e13b01d62382d33639c718437fcc946a1); the diff includes nested replay and topology-failure browser scenarios. [PR #2](https://github.com/gracee3/mirabile/pull/2) records those scenarios passing.
+- **Status:** demonstrated at the reported cockpit gate, with explicit backward compatibility for existing version-1 macros.
+- **Prompt seed:** supply a recorded nested edit and a reopened document whose transient IDs differ. Ask how to resolve its intended target and when replay must stop because the structure no longer matches.
+- **Checkable outcome:** serialize meaningful selectors rather than transient IDs; validate the assumptions of key/ordinal/path selectors; fail visibly instead of editing a plausible wrong row; keep unparsable form text separate from committed typed data.
+- **Broader lesson:** replay depends on stable meaning, not on preserving a particular session's incidental identifiers.
+
+### MIR-4 — Remove circular-layout collisions without falsifying the underlying coordinates
+
+- **Turning point:** the professional wheel separated true astronomical anchors from displaced labels and leaders. A later biwheel correction expanded collision handling beyond point labels to angle, zodiac and house landmarks.
+- **Evidence:** [professional wheel PR #3](https://github.com/gracee3/mirabile/pull/3); [landmark collision fix `b8893e5`](https://github.com/gracee3/mirabile/commit/b8893e5574eb59234d3a02b2c055664ce5352b95); [final product verification record](https://github.com/gracee3/mirabile/blob/b8893e5574eb59234d3a02b2c055664ce5352b95/docs/goals/charts-wheel-settings-progress.md).
+- **Status:** demonstrated for the reported fixtures and viewports. PR #3 records four viewport journeys; PR #4 records three product viewports with no measured point/point or point/landmark overlaps. This is not a proof for every possible dense chart.
+- **Prompt seed:** provide a cluster straddling the circular seam, fixed semantic anchors, landmark bounding boxes and viewport bounds. Ask for a deterministic readable placement or a diagnosis of a misleading existing placement.
+- **Checkable outcome:** preserve true angular positions and semantic aspect identity; move labels with leaders; account for all relevant label classes; retain stable ordering and accessible descriptions; check actual geometry at compact bounds.
+- **Broader lesson:** improving presentation must not silently alter the data it presents. The same problem appears in maps, scientific plots and network diagrams.
+
+### MIR-5 — Capture time and working state so a saved workspace reloads exactly
+
+- **Turning point:** the live-workflow branch introduced captured working charts and explicit time actions. Stepping a saved chart creates an independent variation; workspace persistence captures its exact facts rather than reevaluating “now” on reload.
+- **Evidence:** [working-chart foundation `af15f4b`](https://github.com/gracee3/mirabile/commit/af15f4b37f2f0216fa30271af8b9253e1b9a8ca9); [time-step implementation and boundary tests](https://github.com/gracee3/mirabile/blob/b8893e5574eb59234d3a02b2c055664ce5352b95/crates/mirabile-core/src/time_step.rs); [unmerged PR #4](https://github.com/gracee3/mirabile/pull/4).
+- **Status:** demonstrated in the reported 215-step product journey at three viewports, using a fixed clock, real application/Worker/XALEN and exact reload comparisons. Merge is still pending.
+- **Prompt seed:** supply a saved chart, a captured current-time chart and a sequence of calendar/duration steps, edits, swaps, saves and reloads. Ask for the final per-slot facts, library contents and expected calculation identities.
+- **Checkable outcome:** saved originals remain unchanged by working variations; unfinished editor buffers cannot be silently captured; captured time stays fixed on reload; UTC/fixed offsets survive. Under this contract, Jan 31, 2025 plus one month twice becomes Mar 28, not Mar 31: calendar clamping is independent per action, so month steps need not round-trip at boundaries.
+- **Broader lesson:** persistence must distinguish facts, live instructions and unfinished edits. A detailed prompt with an exact expected state can exercise this without a UI.
+
+### Additional ideas and the browser rabbit hole
+
+- Screenshot retries in `6470efe` and `854b2b2` were followed by restored standard capture, an explicit blocked-gate record and infrastructure corrections. [The later correction](https://github.com/gracee3/mirabile/commit/e111dc9bc6b8eec3fb2228ab1e8205eec7e3c63e) and final progress record identify full temporary storage, configurable shared-memory use and isolated profiles. A scenario could ask the agent to diagnose the environment from evidence before adding more retries or changing application behavior.
+- The final product gate passed; earlier screenshot failures should not be described as a final application failure. Preserve intermediate gate status and later recovery separately.
+- The original runtime fix also stopped the deterministic backend from claiming unsupported coordinate systems, corrections and house systems. A capability/provenance audit can be a prompt-only candidate: advertised semantics must match the implementation actually used.
+- `c1ac17c` adds time-conversion fingerprinting. Inspect the full cache-key transition before isolating a stale-cache scenario.
+- Known-answer checks reach owned live browser output, using independent JPL/Swiss references with circular angle comparisons. This suggests a general evaluator task: an isolated provider test cannot establish that the displayed result came from the intended computation.
+- Raw logs and screenshots cited by the PRs remain under ignored local output paths. Public commits and verification records support the historical claims, but extracting a complete visual replay will require those artifacts or a fresh run later.
