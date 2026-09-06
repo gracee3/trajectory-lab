@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/gracee3/trajectory-lab/schemas/task.schema.json",
+  "title": "Task Manifest",
+  "type": "object",
+  "required": ["task_id", "split", "instruction", "source", "validation"],
+  "properties": {
+    "task_id": {"type": "string"},
+    "split": {"enum": ["train", "dev", "held-out"]},
+    "family": {"type": ["string", "null"]},
+    "instruction": {"type": "string"},
+    "source": {
+      "type": "object",
+      "required": ["repository", "base_commit"],
+      "properties": {
+        "dataset": {"type": ["string", "null"]},
+        "repository": {"type": "string"},
+        "base_commit": {"type": "string"},
+        "license": {"type": ["string", "null"]}
+      },
+      "additionalProperties": true
+    },
+    "environment": {
+      "type": "object",
+      "properties": {
+        "image": {"type": ["string", "null"]},
+        "digest": {"type": ["string", "null"]}
+      },
+      "additionalProperties": true
+    },
+    "validation": {
+      "type": "object",
+      "required": ["commands"],
+      "properties": {
+        "commands": {"type": "array", "items": {"type": "string"}},
+        "hard_gates": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": true
+    },
+    "metadata": {"type": "object"}
+  },
+  "additionalProperties": true
+}
