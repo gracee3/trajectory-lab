@@ -6,6 +6,8 @@ Trajectory Lab is an educational project studying the observable execution lifec
 
 ## Start here
 
+- [Environment Lineage and Reuse Plan](docs/ENVIRONMENT_PLAN.md): existing Dockerfiles across all eight projects, shared profiles, offline installers and validation gates.
+
 - [Project Scenario Backlog](docs/PROJECT_SCENARIOS.md): working TODO for reviewing existing projects and extracting focused scenarios.
 - [Vision](docs/VISION.md): purpose and boundaries.
 - [Phase 2: Controlled SWE Experiments](docs/EXPERIMENT_PLAN.md): task contracts, initial tasks, broader domains and implementation sequence.
@@ -16,7 +18,9 @@ Trajectory Lab is an educational project studying the observable execution lifec
 
 ## Next phase
 
-Start by reviewing existing projects with their owner: WhisperX-batch, heterogeneous Tiger Lake work, CPU gpt-oss work, Supermicro/Prometheus observability, and Qwen INT8 quantization. Track code evidence, what was difficult, known solutions, possible fixture boundaries, and independent checks in the [Project Scenario Backlog](docs/PROJECT_SCENARIOS.md). Begin with one issue from WhisperX-batch.
+The [Project Scenario Backlog](docs/PROJECT_SCENARIOS.md) records five candidate areas for each of eight personal projects. Pause example expansion and review the [Environment Lineage and Reuse Plan](docs/ENVIRONMENT_PLAN.md) before implementation. It inventories existing Dockerfiles and distinguishes development images, application runtimes, services and protected evaluators.
+
+Use Ubuntu 26.04 as the preferred new-family target, while preserving existing project image families where useful. Share a versioned Codex support payload and run contract across them. Next, select one environment and prove launch/capture, a healthy project check and offline dependency provisioning before adding more layers. Exact image/tool versions and compatibility still require validation.
 
 The parser, migration, and supervisor briefs in the experiment plan remain optional examples rather than mandatory first tasks. Each selected scenario will need fixed starting code/data, a reproducible environment, a behavioral contract, and protected independent acceptance checks.
 
@@ -38,7 +42,7 @@ Source/documentation research is published at a pinned upstream commit. Runtime 
 
 This repository contains documentation and legacy draft schemas. There are no implemented task fixtures, recorder, independent evaluator or replay tool yet. The phase-2 update records the authorized next direction, not completed experiments.
 
-- `docs/`: vision, research, project scenario backlog, experiment plan, evaluation, and roadmap.
+- `docs/`: vision, research, project scenario backlog, environment lineage, experiment plan, evaluation, and roadmap.
 - `tasks/`: planned versioned SWE fixtures and task contracts.
 - `runners/`: planned autonomous Codex execution and capture.
 - `evaluators/`: planned independent artifact checks and capture-fidelity checks.
